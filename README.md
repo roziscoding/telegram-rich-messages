@@ -2,11 +2,12 @@
 
 Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, a fluent builder, TSX, or any combination. Every entrypoint produces canonical Telegram objects directly.
 
+- Built on [`@grammyjs/types`](https://github.com/grammyjs/types) — builders return those exact objects, ready to send with grammY or any Bot API client
 - No React or virtual DOM
 - No Bot API client or bot framework
 - Compile-time hierarchy checks with functional builders
 - Runtime validation for JavaScript, casts, and TSX composition
-- Covers the Bot API 10.2 rich-text entities and block types
+- Covers every rich-message block and rich-text entity in `@grammyjs/types`
 
 ## Usage
 
@@ -59,7 +60,7 @@ The same checks run at runtime for JavaScript and values coming from `any`, `unk
 ### Fluent API
 
 ```ts
-import { RichMessageBuilder } from "telegram-rich-messages/builder";
+import { RichMessageBuilder } from "telegram-rich-messages/fluent";
 import { bold } from "telegram-rich-messages/core";
 
 const results = [
@@ -83,7 +84,7 @@ const input = new RichMessageBuilder({ skipEntityDetection: true })
   .build();
 ```
 
-`build()` and the `blocks` getter return snapshots; later mutations do not change earlier results. Use `.add(block)` to append any block from the functional API.
+Every functional block builder has a matching method on `RichMessageBuilder`, including media (`photo`, `video`, …) and containers (`blockQuote`, `collage`, `details`, …). Use `.add(block)` to append any pre-built block value. `build()` and the `blocks` getter return snapshots; later mutations do not change earlier results.
 
 ### TSX
 
@@ -98,7 +99,7 @@ Point TypeScript at the package's JSX runtime:
 }
 ```
 
-Then use `.tsx` files without installing React:
+`jsxImportSource` only tells the compiler where the JSX runtime lives; the components themselves are imported from `telegram-rich-messages/components`. Use `.tsx` files without installing React:
 
 ```tsx
 import {
@@ -110,7 +111,7 @@ import {
   TableCell,
   TableRow,
   expectRichMessage,
-} from "telegram-rich-messages/jsx";
+} from "telegram-rich-messages/components";
 
 const input = expectRichMessage(
   <RichMessage skipEntityDetection>
@@ -139,7 +140,7 @@ Functional values can go directly inside TSX:
 
 ```tsx
 import { bold, table, tableCell, tableRow } from "telegram-rich-messages/core";
-import { Paragraph, RichMessage } from "telegram-rich-messages/jsx";
+import { Paragraph, RichMessage } from "telegram-rich-messages/components";
 
 <RichMessage>
   <Paragraph>Generated with TSX.</Paragraph>
@@ -154,7 +155,7 @@ TypeScript widens JSX expressions to `JSX.Element`. Use a runtime narrowing guar
 
 ```tsx
 import { bold, richMessage, table } from "telegram-rich-messages/core";
-import { TableCell, TableRow, expectTableRow } from "telegram-rich-messages/jsx";
+import { TableCell, TableRow, expectTableRow } from "telegram-rich-messages/components";
 
 const row = (
   <TableRow>
@@ -180,9 +181,9 @@ Available guards:
 
 The package has three public entrypoints:
 
-- `telegram-rich-messages/core` — functional builders and canonical Telegram types
-- `telegram-rich-messages/jsx` — TSX components and narrowing guards
-- `telegram-rich-messages/builder` — `RichMessageBuilder`, `TableBuilder`, and `TableRowBuilder`
+- `telegram-rich-messages/core` — functional builders and the Telegram types (re-exported from `@grammyjs/types`)
+- `telegram-rich-messages/components` — TSX components and narrowing guards
+- `telegram-rich-messages/fluent` — `RichMessageBuilder`, `TableBuilder`, and `TableRowBuilder`
 
 Every TSX component has a lower-camel-case builder in `core`.
 
@@ -197,6 +198,12 @@ Every TSX component has a lower-camel-case builder in `core`.
 | Entities | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` | `dateTime`, `textMention`, `customEmoji`, `inlineMath`, `link`, `email`, `phone`, `bankCard`, `mention`, `hashtag`, `cashtag`, `botCommand`, `textAnchor`, `anchorLink`, `reference`, `referenceLink` |
 
 Props use camelCase. Builders immediately produce the Bot API's snake_case fields.
+
+### Types
+
+Builders return [`@grammyjs/types`](https://github.com/grammyjs/types) values — `InputRichMessage`, `InputRichBlock`, `RichText`, and friends — carrying a non-enumerable brand used for runtime category checks. The brand disappears in `JSON.stringify` and is structurally assignable to the bare grammY type, so a result passes straight to grammY (or any Bot API client) unchanged. These Telegram types are re-exported from `telegram-rich-messages/core`.
+
+Media builders take a Telegram `InputMedia` payload; its `media` field is a file_id or URL.
 
 Public composition types include `RichTextValue`, `BlockValue`, `ListItemValue`, `TableCellValue`, `TableRowValue`, and `RichMessageValue`.
 
