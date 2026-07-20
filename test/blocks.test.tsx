@@ -31,7 +31,7 @@ test("serializes every InputRichBlock variant", () => {
       <Slideshow caption="Slides"><Video media={video} /></Slideshow>
       <Table bordered striped caption="Numbers">
         <TableRow><TableCell header align="center" valign="middle">Name</TableCell><TableCell>Value</TableCell></TableRow>
-        <TableRow><TableCell colspan={2}>Answer: 42</TableCell></TableRow>
+        <TableRow><TableCell colspan={2}>Answer: 42</TableCell><TableCell /></TableRow>
       </Table>
       <Details summary={<Bold>More</Bold>} open><Paragraph>Hidden-ish</Paragraph></Details>
       <Map location={{ latitude: 51.5, longitude: -0.12 }} zoom={12} width={800} height={400} caption="London" />
@@ -69,7 +69,10 @@ test("serializes every InputRichBlock variant", () => {
         { text: "Name", is_header: true, align: "center", valign: "middle" },
         { text: "Value", align: "left", valign: "top" },
       ],
-      [{ text: "Answer: 42", colspan: 2, align: "left", valign: "top" }],
+      [
+        { text: "Answer: 42", colspan: 2, align: "left", valign: "top" },
+        { align: "left", valign: "top" },
+      ],
     ],
     is_bordered: true,
     is_striped: true,

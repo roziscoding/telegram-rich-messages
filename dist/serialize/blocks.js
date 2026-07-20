@@ -6,113 +6,77 @@ function caption(props) {
             throw new TypeError("credit requires caption text");
         return undefined;
     }
-    const value = { text: richText(props.caption) };
-    if (props.credit !== undefined)
-        value.credit = richText(props.credit);
-    return value;
-}
-function setOptional(target, key, value) {
-    if (value !== undefined && value !== false)
-        target[key] = value;
+    return {
+        text: richText(props.caption),
+        ...(props.credit === undefined ? {} : { credit: richText(props.credit) }),
+    };
 }
 function listItem(value) {
     if (value.kind !== "list-item")
         throw new TypeError("<List> only accepts <ListItem> children");
-    const result = {
+    const base = {
         blocks: childNodes(value.props.children, "<ListItem>").map(block),
+        ...(value.props.value === undefined ? {} : { value: value.props.value }),
+        ...(value.props.labelType === undefined ? {} : { type: value.props.labelType }),
     };
-    if (value.props.checkbox === true)
-        result.has_checkbox = true;
-    if (value.props.checked === true)
-        result.is_checked = true;
-    if (value.props.value !== undefined)
-        result.value = value.props.value;
-    if (value.props.labelType !== undefined)
-        result.type = value.props.labelType;
-    return result;
+    if (value.props.checked === true && value.props.checkbox !== true) {
+        throw new TypeError("checked requires checkbox");
+    }
+    if (value.props.checkbox === true) {
+        return { ...base, has_checkbox: true, ...(value.props.checked === true ? { is_checked: true } : {}) };
+    }
+    return base;
 }
 function tableCell(value) {
     if (value.kind !== "table-cell")
         throw new TypeError("<TableRow> only accepts <TableCell> children");
-    const result = {
-        text: richText(value.props.children),
+    return {
+        ...(value.props.children === undefined ? {} : { text: richText(value.props.children) }),
         align: value.props.align ?? "left",
         valign: value.props.valign ?? "top",
+        ...(value.props.header === true ? { is_header: true } : {}),
+        ...(value.props.colspan === undefined ? {} : { colspan: value.props.colspan }),
+        ...(value.props.rowspan === undefined ? {} : { rowspan: value.props.rowspan }),
     };
-    if (value.props.header === true)
-        result.is_header = true;
-    if (value.props.colspan !== undefined)
-        result.colspan = value.props.colspan;
-    if (value.props.rowspan !== undefined)
-        result.rowspan = value.props.rowspan;
-    return result;
-}
-function serializeTextBlock(value) {
-    return { type: value.kind, text: richText(value.props.children) };
-}
-function serializeHeading(value) {
-    return { type: "heading", text: richText(value.props.children), size: value.props.size };
-}
-function serializePre(value) {
-    const result = { type: "pre", text: richText(value.props.children) };
-    setOptional(result, "language", value.props.language);
-    return result;
-}
-function serializeList(value) {
-    return { type: "list", items: childNodes(value.props.children, "<List>").map(listItem) };
 }
 function serializeBlockQuote(value) {
-    const result = {
+    return {
         type: "blockquote",
         blocks: childNodes(value.props.children, "<BlockQuote>").map(block),
+        ...(value.props.credit === undefined ? {} : { credit: richText(value.props.credit) }),
     };
-    if (value.props.credit !== undefined)
-        result.credit = richText(value.props.credit);
-    return result;
 }
 function serializePullQuote(value) {
-    const result = { type: "pullquote", text: richText(value.props.children) };
-    if (value.props.credit !== undefined)
-        result.credit = richText(value.props.credit);
-    return result;
-}
-function serializeBlockCollection(value) {
-    const result = {
-        type: value.kind,
-        blocks: childNodes(value.props.children, `<${value.kind}>`).map(block),
+    return {
+        type: "pullquote",
+        text: richText(value.props.children),
+        ...(value.props.credit === undefined ? {} : { credit: richText(value.props.credit) }),
     };
-    setOptional(result, "caption", caption(value.props));
-    return result;
+}
+function serializeCollection(type, value) {
+    const richCaption = caption(value.props);
+    return {
+        type,
+        blocks: childNodes(value.props.children, `<${type}>`).map(block),
+        ...(richCaption === undefined ? {} : { caption: richCaption }),
+    };
 }
 function serializeTable(value) {
-    const rows = childNodes(value.props.children, "<Table>").map((row) => {
+    const cells = childNodes(value.props.children, "<Table>").map((row) => {
         if (row.kind !== "table-row")
             throw new TypeError("<Table> only accepts <TableRow> children");
         return childNodes(row.props.children, "<TableRow>").map(tableCell);
     });
-    const result = { type: "table", cells: rows };
-    if (value.props.bordered === true)
-        result.is_bordered = true;
-    if (value.props.striped === true)
-        result.is_striped = true;
-    if (value.props.caption !== undefined)
-        result.caption = richText(value.props.caption);
-    return result;
-}
-function serializeDetails(value) {
-    const result = {
-        type: "details",
-        summary: richText(value.props.summary),
-        blocks: childNodes(value.props.children, "<Details>").map(block),
+    return {
+        type: "table",
+        cells,
+        ...(value.props.bordered === true ? { is_bordered: true } : {}),
+        ...(value.props.striped === true ? { is_striped: true } : {}),
+        ...(value.props.caption === undefined ? {} : { caption: richText(value.props.caption) }),
     };
-    if (value.props.open === true)
-        result.is_open = true;
-    return result;
 }
 function serializeMap(value) {
-    const zoom = value.props.zoom;
-    const width = value.props.width;
-    const height = value.props.height;
+    const { zoom, width, height } = value.props;
     if (!Number.isInteger(zoom) || zoom < 0 || zoom > 24)
         throw new RangeError("<Map> zoom must be an integer from 0 to 24");
     if (!Number.isInteger(width) || !Number.isInteger(height) || width < 0 || height < 0 || width + height > 10_000) {
@@ -121,34 +85,63 @@ function serializeMap(value) {
     if ((width === 0) !== (height === 0) || (width > 0 && Math.max(width / height, height / width) > 20)) {
         throw new RangeError("<Map> width-to-height ratio must not exceed 20");
     }
-    const result = { type: "map", location: value.props.location, zoom, width, height };
-    setOptional(result, "caption", caption(value.props));
-    return result;
+    const richCaption = caption(value.props);
+    return {
+        type: "map",
+        location: value.props.location,
+        zoom,
+        width,
+        height,
+        ...(richCaption === undefined ? {} : { caption: richCaption }),
+    };
 }
-function serializeMediaBlock(value) {
-    const result = { type: value.kind, [value.kind]: value.props.media };
-    setOptional(result, "caption", caption(value.props));
-    return result;
-}
-const blockSerializers = new Map([
-    ...["paragraph", "footer", "thinking"]
-        .map((kind) => [kind, serializeTextBlock]),
-    ["heading", serializeHeading],
-    ["pre", serializePre],
-    ["divider", () => ({ type: "divider" })],
-    ["block-mathematical_expression", (value) => ({ type: "mathematical_expression", expression: value.props.expression })],
-    ["block-anchor", (value) => ({ type: "anchor", name: value.props.name })],
-    ["list", serializeList],
-    ["blockquote", serializeBlockQuote],
-    ["pullquote", serializePullQuote],
-    ["collage", serializeBlockCollection],
-    ["slideshow", serializeBlockCollection],
-    ["table", serializeTable],
-    ["details", serializeDetails],
-    ["map", serializeMap],
-    ...["animation", "audio", "photo", "video", "voice_note"]
-        .map((kind) => [kind, serializeMediaBlock]),
-]);
+const blockSerializerDefinitions = {
+    paragraph: (value) => ({ type: "paragraph", text: richText(value.props.children) }),
+    footer: (value) => ({ type: "footer", text: richText(value.props.children) }),
+    thinking: (value) => ({ type: "thinking", text: richText(value.props.children) }),
+    heading: (value) => ({ type: "heading", text: richText(value.props.children), size: value.props.size }),
+    pre: (value) => ({ type: "pre", text: richText(value.props.children), ...(value.props.language === undefined ? {} : { language: value.props.language }) }),
+    divider: () => ({ type: "divider" }),
+    "block-mathematical_expression": (value) => ({ type: "mathematical_expression", expression: value.props.expression }),
+    "block-anchor": (value) => ({ type: "anchor", name: value.props.name }),
+    list: (value) => ({ type: "list", items: childNodes(value.props.children, "<List>").map(listItem) }),
+    blockquote: serializeBlockQuote,
+    pullquote: serializePullQuote,
+    collage: (value) => serializeCollection("collage", value),
+    slideshow: (value) => serializeCollection("slideshow", value),
+    table: serializeTable,
+    details: (value) => ({
+        type: "details",
+        summary: richText(value.props.summary),
+        blocks: childNodes(value.props.children, "<Details>").map(block),
+        ...(value.props.open === true ? { is_open: true } : {}),
+    }),
+    map: serializeMap,
+    animation: (value) => {
+        const richCaption = caption(value.props);
+        return { type: "animation", animation: value.props.media, ...(richCaption === undefined ? {} : { caption: richCaption }) };
+    },
+    audio: (value) => {
+        const richCaption = caption(value.props);
+        return { type: "audio", audio: value.props.media, ...(richCaption === undefined ? {} : { caption: richCaption }) };
+    },
+    photo: (value) => {
+        const richCaption = caption(value.props);
+        return { type: "photo", photo: value.props.media, ...(richCaption === undefined ? {} : { caption: richCaption }) };
+    },
+    video: (value) => {
+        const richCaption = caption(value.props);
+        return { type: "video", video: value.props.media, ...(richCaption === undefined ? {} : { caption: richCaption }) };
+    },
+    voice_note: (value) => {
+        const richCaption = caption(value.props);
+        return { type: "voice_note", voice_note: value.props.media, ...(richCaption === undefined ? {} : { caption: richCaption }) };
+    },
+};
+const blockSerializers = new Map(Object.entries(blockSerializerDefinitions).map(([kind, serializer]) => [
+    kind,
+    (value) => serializer(value),
+]));
 export function block(value) {
     const serializer = blockSerializers.get(value.kind);
     if (!serializer)

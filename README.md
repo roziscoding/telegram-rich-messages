@@ -194,6 +194,33 @@ Component props use idiomatic camelCase; `render()` converts them to the Bot API
 
 > **Draft-only block:** Telegram permits `Thinking` only in `sendRichMessageDraft` payloads. The renderer cannot infer which endpoint will eventually consume the object, so endpoint selection remains the caller's responsibility.
 
+## Type safety
+
+The library checks component props, required fields, conditional prop combinations, leaf/structural children categories, and the complete rendered Bot API schema at compile time.
+
+```tsx
+<ListItem checked />;
+// Error: checked requires checkbox={true}
+
+<Table>raw text</Table>;
+// Error: structural containers only accept JSX elements
+
+<Divider>no children</Divider>;
+// Error: leaf components do not accept children
+```
+
+`InputRichBlock` and `RichTextEntity` are discriminated unions, so rendered output narrows by `type`:
+
+```ts
+const first = render(message).blocks[0];
+
+if (first?.type === "table") {
+  first.cells; // RichBlockTableCell[][]
+}
+```
+
+TypeScript treats every JSX expression as the opaque global `JSX.Element` type. Consequently, component identity inside `children` cannot be checked statically: `<Table><Paragraph /></Table>` compiles, but `render()` rejects it. Exact Telegram nesting rules are therefore enforced at runtime.
+
 ## Development
 
 The source is organized by responsibility:

@@ -69,7 +69,11 @@ describe("render", () => {
       </RichMessage>,
     );
 
-    expect(output.blocks[0]?.text).toEqual([
+    const first = output.blocks[0];
+    expect(first?.type).toBe("paragraph");
+    if (!first || first.type !== "paragraph") throw new Error("expected paragraph output");
+
+    expect(first.text).toEqual([
       { type: "italic", text: "i" }, { type: "underline", text: "u" },
       { type: "strikethrough", text: "s" }, { type: "spoiler", text: "secret" },
       { type: "date_time", text: "epoch", unix_time: 0, date_time_format: "dd MMM yyyy" },

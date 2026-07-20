@@ -1,13 +1,4 @@
-import type { Child, Node } from "../jsx-runtime.js";
-export type CaptionProps = {
-    caption: Child;
-    credit?: Child;
-} | {
-    caption?: undefined;
-    credit?: never;
-};
-export interface ChildrenProps {
-    children?: Child;
-}
-export declare function node(kind: string, props: object): Node;
+import type { Node, NodeKind, NodePropsByKind } from "../jsx-runtime.js";
+export type { CaptionProps, ChildrenProps, ElementChild, ElementChildrenProps, ListItemSelectionProps, NoChildrenProps, } from "../jsx-runtime.js";
+export declare function node<K extends NodeKind>(kind: K, props: NodePropsByKind[K]): Node<K>;
 //# sourceMappingURL=shared.d.ts.map

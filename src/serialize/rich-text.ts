@@ -1,33 +1,56 @@
-import type { Child, Node } from "../jsx-runtime.js";
-import type { RichText } from "../types.js";
+import type { Child, Node, RichTextNodeKind } from "../jsx-runtime.js";
+import type { RichText, RichTextEntity, RichTextNested } from "../types.js";
 import { flatten } from "./common.js";
 
-type RichTextSerializer = (value: Node) => RichText;
+type RichTextSerializerDefinitions = {
+  [K in RichTextNodeKind]: (value: Node<K>) => RichTextEntity;
+};
 
-function serializeNestedText(value: Node): RichText {
-  return { type: value.kind, text: richText(value.props.children as Child) };
+type NestedKind = RichTextNested["type"];
+
+function nested<K extends NestedKind>(type: K): (value: Node<K>) => RichTextNested {
+  return (value) => ({ type, text: richText(value.props.children) });
 }
 
-const richTextSerializers = new Map<string, RichTextSerializer>([
-  ...["bold", "italic", "underline", "strikethrough", "spoiler", "subscript", "superscript", "marked", "code"]
-    .map((kind): [string, RichTextSerializer] => [kind, serializeNestedText]),
-  ["date_time", (value) => ({ type: value.kind, text: richText(value.props.children as Child), unix_time: value.props.unixTime, date_time_format: value.props.format })],
-  ["text_mention", (value) => ({ type: value.kind, text: richText(value.props.children as Child), user: value.props.user })],
-  ["custom_emoji", (value) => ({ type: value.kind, custom_emoji_id: value.props.id, alternative_text: value.props.alt })],
-  ["mathematical_expression", (value) => ({ type: value.kind, expression: value.props.expression })],
-  ["url", (value) => ({ type: value.kind, text: richText(value.props.children as Child), url: value.props.url })],
-  ["email_address", (value) => ({ type: value.kind, text: richText(value.props.children as Child), email_address: value.props.address })],
-  ["phone_number", (value) => ({ type: value.kind, text: richText(value.props.children as Child), phone_number: value.props.number })],
-  ["bank_card_number", (value) => ({ type: value.kind, text: richText(value.props.children as Child), bank_card_number: value.props.number })],
-  ["mention", (value) => ({ type: value.kind, text: richText(value.props.children as Child), username: value.props.username })],
-  ["hashtag", (value) => ({ type: value.kind, text: richText(value.props.children as Child), hashtag: value.props.value })],
-  ["cashtag", (value) => ({ type: value.kind, text: richText(value.props.children as Child), cashtag: value.props.value })],
-  ["bot_command", (value) => ({ type: value.kind, text: richText(value.props.children as Child), bot_command: value.props.command })],
-  ["anchor", (value) => ({ type: value.kind, name: value.props.name })],
-  ["anchor_link", (value) => ({ type: value.kind, text: richText(value.props.children as Child), anchor_name: value.props.name })],
-  ["reference", (value) => ({ type: value.kind, text: richText(value.props.children as Child), name: value.props.name })],
-  ["reference_link", (value) => ({ type: value.kind, text: richText(value.props.children as Child), reference_name: value.props.name })],
-]);
+const richTextSerializerDefinitions = {
+  bold: nested("bold"),
+  italic: nested("italic"),
+  underline: nested("underline"),
+  strikethrough: nested("strikethrough"),
+  spoiler: nested("spoiler"),
+  subscript: nested("subscript"),
+  superscript: nested("superscript"),
+  marked: nested("marked"),
+  code: nested("code"),
+  date_time: (value) => ({
+    type: "date_time",
+    text: richText(value.props.children),
+    unix_time: value.props.unixTime,
+    date_time_format: value.props.format,
+  }),
+  text_mention: (value) => ({ type: "text_mention", text: richText(value.props.children), user: value.props.user }),
+  custom_emoji: (value) => ({ type: "custom_emoji", custom_emoji_id: value.props.id, alternative_text: value.props.alt }),
+  mathematical_expression: (value) => ({ type: "mathematical_expression", expression: value.props.expression }),
+  url: (value) => ({ type: "url", text: richText(value.props.children), url: value.props.url }),
+  email_address: (value) => ({ type: "email_address", text: richText(value.props.children), email_address: value.props.address }),
+  phone_number: (value) => ({ type: "phone_number", text: richText(value.props.children), phone_number: value.props.number }),
+  bank_card_number: (value) => ({ type: "bank_card_number", text: richText(value.props.children), bank_card_number: value.props.number }),
+  mention: (value) => ({ type: "mention", text: richText(value.props.children), username: value.props.username }),
+  hashtag: (value) => ({ type: "hashtag", text: richText(value.props.children), hashtag: value.props.value }),
+  cashtag: (value) => ({ type: "cashtag", text: richText(value.props.children), cashtag: value.props.value }),
+  bot_command: (value) => ({ type: "bot_command", text: richText(value.props.children), bot_command: value.props.command }),
+  anchor: (value) => ({ type: "anchor", name: value.props.name }),
+  anchor_link: (value) => ({ type: "anchor_link", text: richText(value.props.children), anchor_name: value.props.name }),
+  reference: (value) => ({ type: "reference", text: richText(value.props.children), name: value.props.name }),
+  reference_link: (value) => ({ type: "reference_link", text: richText(value.props.children), reference_name: value.props.name }),
+} satisfies RichTextSerializerDefinitions;
+
+const richTextSerializers = new Map<string, (value: Node) => RichTextEntity>(
+  Object.entries(richTextSerializerDefinitions).map(([kind, serializer]) => [
+    kind,
+    (value) => serializer(value as never),
+  ]),
+);
 
 export function richText(child: Child): RichText {
   const parts: RichText[] = [];

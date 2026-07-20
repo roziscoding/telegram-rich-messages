@@ -1,4 +1,4 @@
 import type { Node } from "./jsx-runtime.js";
-import type { InputRichMessage } from "./types.js";
-export declare function render(element: Node): InputRichMessage;
+import type { RenderedRichMessage } from "./types.js";
+export declare function render(element: Node): RenderedRichMessage;
 //# sourceMappingURL=render.d.ts.map

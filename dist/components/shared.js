@@ -1,4 +1,4 @@
 export function node(kind, props) {
-    return { kind, props: props };
+    return { kind, props };
 }
 //# sourceMappingURL=shared.js.map

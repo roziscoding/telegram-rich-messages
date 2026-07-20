@@ -1,6 +1,5 @@
-import type { Node } from "../jsx-runtime.js";
-import { node, type ChildrenProps } from "./shared.js";
+import { node, type ElementChildrenProps } from "./shared.js";
 
-export function RichMessage(props: ChildrenProps & { isRtl?: boolean; skipEntityDetection?: boolean }): Node {
+export function RichMessage(props: ElementChildrenProps & { isRtl?: boolean; skipEntityDetection?: boolean }) {
   return node("rich-message", props);
 }

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Map, Paragraph, Photo, RichMessage, render } from "../src/index.js";
+import { List, ListItem, Map, Paragraph, Photo, RichMessage, render } from "../src/index.js";
 
 const photo = { type: "photo" as const, media: "photo-file-id" };
 
@@ -10,7 +10,7 @@ if (false) {
 
 test("rejects compositions that cannot be sent as InputRichMessage", () => {
   expect(() => render(<Paragraph>not a root</Paragraph>)).toThrow("<RichMessage> root");
-  expect(() => render(<RichMessage>plain text at block level</RichMessage>)).toThrow("only accepts TSX elements");
+  expect(() => render(RichMessage({ children: "plain text at block level" } as any))).toThrow("only accepts TSX elements");
   expect(() => render(
     <RichMessage>
       <Map location={{ latitude: 0, longitude: 0 }} zoom={25} width={100} height={100} />
@@ -29,6 +29,9 @@ test("rejects compositions that cannot be sent as InputRichMessage", () => {
   expect(() => render(
     <RichMessage>{Photo({ media: photo, credit: "Unattached credit" } as any)}</RichMessage>,
   )).toThrow("credit requires caption");
+  expect(() => render(
+    <RichMessage><List>{ListItem({ checked: true } as any)}</List></RichMessage>,
+  )).toThrow("checked requires checkbox");
 });
 
 test("accepts the documented zero boundary for map dimensions", () => {

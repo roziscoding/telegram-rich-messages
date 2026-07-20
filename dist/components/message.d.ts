@@ -1,7 +1,12 @@
-import type { Node } from "../jsx-runtime.js";
-import { type ChildrenProps } from "./shared.js";
-export declare function RichMessage(props: ChildrenProps & {
+import { type ElementChildrenProps } from "./shared.js";
+export declare function RichMessage(props: ElementChildrenProps & {
     isRtl?: boolean;
     skipEntityDetection?: boolean;
-}): Node;
+}): {
+    readonly kind: "rich-message";
+    readonly props: ElementChildrenProps & {
+        isRtl?: boolean;
+        skipEntityDetection?: boolean;
+    };
+};
 //# sourceMappingURL=message.d.ts.map
