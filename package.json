@@ -1,0 +1,44 @@
+{
+  "name": "telegram-rich-messages",
+  "version": "0.1.0",
+  "description": "Compose Telegram Bot API rich messages with type-safe TSX",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/jsx-runtime.d.ts",
+      "import": "./dist/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/jsx-dev-runtime.d.ts",
+      "import": "./dist/jsx-dev-runtime.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check": "bun run build && tsc --noEmit && bun test",
+    "test": "bun run build && bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "latest"
+  },
+  "keywords": ["telegram", "bot-api", "rich-message", "tsx", "jsx"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/roziscoding/telegram-rich-messages.git"
+  },
+  "homepage": "https://github.com/roziscoding/telegram-rich-messages#readme",
+  "bugs": {
+    "url": "https://github.com/roziscoding/telegram-rich-messages/issues"
+  }
+}
