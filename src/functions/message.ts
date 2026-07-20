@@ -1,4 +1,4 @@
-import type { RenderedRichMessage } from "../types.js";
+import type { InputRichMessageBlocks } from "../types.js";
 import { brand, type RichMessageValue } from "../values.js";
 import { blocks, splitOptions, type BlockInput } from "./shared.js";
 
@@ -13,7 +13,7 @@ export function richMessage(first?: RichMessageOptions | BlockInput, ...rest: re
   const [options = {}, children] = splitOptions<RichMessageOptions, BlockInput>(
     first, rest, "richMessage()", ["isRtl", "skipEntityDetection"], "block",
   );
-  const value: RenderedRichMessage = {
+  const value: InputRichMessageBlocks = {
     blocks: blocks(children, "richMessage()"),
     ...(options.isRtl === true ? { is_rtl: true as const } : {}),
     ...(options.skipEntityDetection === true ? { skip_entity_detection: true as const } : {}),

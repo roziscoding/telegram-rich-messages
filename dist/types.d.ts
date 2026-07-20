@@ -2,16 +2,17 @@ export interface InputRichMessageMedia {
     id: string;
     media: InputMediaAnimation | InputMediaAudio | InputMediaPhoto | InputMediaVideo | InputMediaVoiceNote;
 }
-interface InputRichMessageOptions {
+export interface InputRichMessageOptions {
     is_rtl?: boolean;
     skip_entity_detection?: boolean;
 }
-export type InputRichMessage = InputRichMessageOptions & ({
+export type InputRichMessageBlocks = InputRichMessageOptions & {
     blocks: InputRichBlock[];
     html?: never;
     markdown?: never;
     media?: never;
-} | {
+};
+export type InputRichMessage = InputRichMessageOptions & (InputRichMessageBlocks | {
     html: string;
     blocks?: never;
     markdown?: never;
@@ -22,11 +23,6 @@ export type InputRichMessage = InputRichMessageOptions & ({
     html?: never;
     media?: InputRichMessageMedia[];
 });
-export interface RenderedRichMessage {
-    blocks: InputRichBlock[];
-    is_rtl?: true;
-    skip_entity_detection?: true;
-}
 export interface RichTextNested {
     type: "bold" | "italic" | "underline" | "strikethrough" | "spoiler" | "subscript" | "superscript" | "marked" | "code";
     text: RichText;

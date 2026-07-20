@@ -10,9 +10,10 @@ Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-m
 
 ## Usage
 
-The API can be used with functional builders or TSX. Both forms create the same canonical values, use the same runtime validation, and can be mixed in one message.
+The API can be used with functions, a fluent builder, or TSX. All three create the same canonical values and use the same runtime validation.
 
 - **[Functional API](#functional-api):** provides the strongest TypeScript guarantees because each builder preserves its exact value category, allowing invalid nesting to be caught at compile time. Deeply nested messages, however, can be harder to scan.
+- **[Fluent API](#fluent-api):** accumulates canonical blocks directly and uses contextual builders for tables.
 - **[TSX](#tsx):** mirrors the message structure and works naturally with arrays, conditions, fragments, and custom components. TypeScript widens JSX expressions to `JSX.Element`, so parent-child hierarchy is checked at runtime instead of compile time.
 
 ### Functional API
@@ -54,6 +55,34 @@ bold(paragraph("not rich text"));    // type error
 ```
 
 The same checks run at runtime for JavaScript and values coming from `any`, `unknown`, or casts.
+
+### Fluent API
+
+```ts
+import { RichMessageBuilder, bold } from "telegram-rich-messages";
+
+const results = [
+  { model: "Aster-1", score: 98.4 },
+  { model: "Hermes-2", score: 97.1 },
+];
+
+const input = new RichMessageBuilder({ skipEntityDetection: true })
+  .heading("Build report", { size: 1 })
+  .paragraph("Status: ", bold("green"))
+  .table(
+    { bordered: true, caption: "Benchmark" },
+    table => table
+      .row(row => row
+        .cell("Model", { header: true })
+        .cell("Score", { header: true, align: "right" }))
+      .rows(results, (row, result) => row
+        .cell(result.model)
+        .cell(bold(result.score), { align: "right" })),
+  )
+  .build();
+```
+
+`build()` and the `blocks` getter return snapshots; later mutations do not change earlier results. Use `.add(block)` to append any block from the functional API.
 
 ### TSX
 
@@ -105,7 +134,7 @@ Arrays, fragments, conditional children, and custom components work normally.
 
 ## Mixing functions and TSX
 
-Functional nodes can go directly inside TSX:
+Functional values can go directly inside TSX:
 
 ```tsx
 <RichMessage>
@@ -117,7 +146,7 @@ Functional nodes can go directly inside TSX:
 </RichMessage>
 ```
 
-TypeScript widens JSX expressions to `JSX.Element`. Use a runtime narrowing guard when a JSX node needs to enter a strict functional boundary:
+TypeScript widens JSX expressions to `JSX.Element`. Use a runtime narrowing guard when a JSX value needs to enter a strict functional boundary:
 
 ```tsx
 const row = (
@@ -142,7 +171,7 @@ Available guards:
 
 ## API
 
-Every TSX component has a lower-camel-case builder.
+Every TSX component has a lower-camel-case builder. The fluent API exports `RichMessageBuilder`, `TableBuilder`, and `TableRowBuilder`.
 
 | Category | TSX | Functions |
 |---|---|---|
