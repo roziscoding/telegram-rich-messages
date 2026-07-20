@@ -2,12 +2,14 @@ import { expect, test } from "bun:test";
 import {
   RichMessageBuilder,
   TableBuilder,
+} from "../src/builder.js";
+import {
   bold,
   paragraph,
   type InputRichBlockParagraph,
   type InputRichMessage,
   type RichBlockTableCell,
-} from "../src/index.js";
+} from "../src/core.js";
 
 const results = [
   { model: "Aster-1", score: 98.4 },

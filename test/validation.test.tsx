@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { List, ListItem, Map, Paragraph, Photo, RichMessage, expectRichMessage } from "../src/index.js";
+import { List, ListItem, Map, Paragraph, Photo, RichMessage, expectRichMessage } from "../src/jsx.js";
 
 const photo = { type: "photo" as const, media: "photo-file-id" };
 

@@ -1,6 +1,6 @@
 # telegram-rich-messages
 
-Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, TSX, or both. Builders produce the canonical Telegram objects directly.
+Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, a fluent builder, TSX, or any combination. Every entrypoint produces canonical Telegram objects directly.
 
 - No React or virtual DOM
 - No Bot API client or bot framework
@@ -27,7 +27,7 @@ import {
   table,
   tableCell,
   tableRow,
-} from "telegram-rich-messages";
+} from "telegram-rich-messages/core";
 
 const input = richMessage(
   heading({ size: 1 }, "Build report"),
@@ -59,7 +59,8 @@ The same checks run at runtime for JavaScript and values coming from `any`, `unk
 ### Fluent API
 
 ```ts
-import { RichMessageBuilder, bold } from "telegram-rich-messages";
+import { RichMessageBuilder } from "telegram-rich-messages/builder";
+import { bold } from "telegram-rich-messages/core";
 
 const results = [
   { model: "Aster-1", score: 98.4 },
@@ -92,7 +93,7 @@ Point TypeScript at the package's JSX runtime:
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "telegram-rich-messages"
+    "jsxImportSource": "telegram-rich-messages/jsx"
   }
 }
 ```
@@ -109,7 +110,7 @@ import {
   TableCell,
   TableRow,
   expectRichMessage,
-} from "telegram-rich-messages";
+} from "telegram-rich-messages/jsx";
 
 const input = expectRichMessage(
   <RichMessage skipEntityDetection>
@@ -137,6 +138,9 @@ Arrays, fragments, conditional children, and custom components work normally.
 Functional values can go directly inside TSX:
 
 ```tsx
+import { bold, table, tableCell, tableRow } from "telegram-rich-messages/core";
+import { Paragraph, RichMessage } from "telegram-rich-messages/jsx";
+
 <RichMessage>
   <Paragraph>Generated with TSX.</Paragraph>
   {table(
@@ -149,6 +153,9 @@ Functional values can go directly inside TSX:
 TypeScript widens JSX expressions to `JSX.Element`. Use a runtime narrowing guard when a JSX value needs to enter a strict functional boundary:
 
 ```tsx
+import { bold, richMessage, table } from "telegram-rich-messages/core";
+import { TableCell, TableRow, expectTableRow } from "telegram-rich-messages/jsx";
+
 const row = (
   <TableRow>
     <TableCell>{bold("hybrid")}</TableCell>
@@ -171,7 +178,13 @@ Available guards:
 
 ## API
 
-Every TSX component has a lower-camel-case builder. The fluent API exports `RichMessageBuilder`, `TableBuilder`, and `TableRowBuilder`.
+The package has three public entrypoints:
+
+- `telegram-rich-messages/core` — functional builders and canonical Telegram types
+- `telegram-rich-messages/jsx` — TSX components and narrowing guards
+- `telegram-rich-messages/builder` — `RichMessageBuilder`, `TableBuilder`, and `TableRowBuilder`
+
+Every TSX component has a lower-camel-case builder in `core`.
 
 | Category | TSX | Functions |
 |---|---|---|

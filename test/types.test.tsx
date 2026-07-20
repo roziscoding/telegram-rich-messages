@@ -1,11 +1,16 @@
-import * as rm from "../src/index.js";
+import * as rm from "../src/core.js";
 import {
   Divider,
   ListItem,
   Paragraph,
   RichMessage,
   Table,
+  TableCell,
+  TableRow,
   expectRichMessage,
+  expectTableRow,
+} from "../src/jsx.js";
+import {
   type InputMediaPhoto,
   type InputRichMessage,
   type InputRichBlockParagraph,
@@ -14,7 +19,7 @@ import {
   type MessageEntity,
   type RichBlockTableCell,
   type TableRowValue,
-} from "../src/index.js";
+} from "../src/core.js";
 
 function expectType<T>(_value: T): void {}
 
@@ -87,10 +92,10 @@ function typeSafetyAssertions(): void {
   rm.bold(rm.blockAnchor({ name: "not-inline" }));
 
   const functionalInsideJsx = <Table>{functionalRow}</Table>;
-  const jsxRow = <rm.TableRow><rm.TableCell>guarded</rm.TableCell></rm.TableRow>;
+  const jsxRow = <TableRow><TableCell>guarded</TableCell></TableRow>;
   // @ts-expect-error JSX erases the row discriminator before strict functional composition.
   rm.table(jsxRow);
-  rm.table(rm.expectTableRow(jsxRow));
+  rm.table(expectTableRow(jsxRow));
   void functionalInsideJsx;
 
   const output = expectRichMessage(<RichMessage><Paragraph>Hello</Paragraph></RichMessage>);

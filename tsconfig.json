@@ -8,7 +8,7 @@
     "exactOptionalPropertyTypes": true,
     "verbatimModuleSyntax": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "telegram-rich-messages",
+    "jsxImportSource": "telegram-rich-messages/jsx",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

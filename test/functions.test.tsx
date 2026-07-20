@@ -1,17 +1,20 @@
 import { expect, test } from "bun:test";
-import * as rm from "../src/index.js";
+import * as rm from "../src/core.js";
 import {
   bold,
-  Bold,
   italic,
-  Paragraph,
-  Table,
   richMessage,
   table,
   tableCell,
   tableRow,
+} from "../src/core.js";
+import {
+  Bold,
+  Paragraph,
+  Table,
   expectRichMessage,
-} from "../src/index.js";
+} from "../src/jsx.js";
+import * as components from "../src/jsx.js";
 
 test("functional builders return canonical Telegram values without rendering", () => {
   const formatted = bold("some", italic("text"), "here");
@@ -59,13 +62,13 @@ test("JSX rich-text components delegate runtime validation to functional builder
 
 test("JSX and functional syntax create the same canonical Telegram value", () => {
   const jsx = (
-    <rm.RichMessage skipEntityDetection>
-      <rm.Table bordered caption={<rm.Bold>Benchmark</rm.Bold>}>
-        <rm.TableRow>
-          <rm.TableCell header align="right"><rm.Italic>98.4</rm.Italic></rm.TableCell>
-        </rm.TableRow>
-      </rm.Table>
-    </rm.RichMessage>
+    <components.RichMessage skipEntityDetection>
+      <components.Table bordered caption={<components.Bold>Benchmark</components.Bold>}>
+        <components.TableRow>
+          <components.TableCell header align="right"><components.Italic>98.4</components.Italic></components.TableCell>
+        </components.TableRow>
+      </components.Table>
+    </components.RichMessage>
   );
   const functional = rm.richMessage(
     { skipEntityDetection: true },
@@ -81,10 +84,10 @@ test("JSX and functional syntax create the same canonical Telegram value", () =>
 test("JSX nodes can enter strict functional composition through runtime narrowing guards", () => {
   const message = rm.richMessage(
     rm.table(
-      rm.expectTableRow(
-        <rm.TableRow>
-          <rm.TableCell>{rm.bold("hybrid")}</rm.TableCell>
-        </rm.TableRow>,
+      components.expectTableRow(
+        <components.TableRow>
+          <components.TableCell>{rm.bold("hybrid")}</components.TableCell>
+        </components.TableRow>,
       ),
     ),
   );
@@ -103,8 +106,8 @@ test("functional builders enforce hierarchy at runtime for JavaScript and cast c
   expect(() => rm.richMessage(rm.inlineMath({ expression: "x" }) as never)).toThrow("richMessage() only accepts rich-message blocks");
   expect(() => rm.bold(rm.blockAnchor({ name: "bad" }) as never)).toThrow("bold() only accepts rich-text children");
   expect(() => rm.list(rm.paragraph("bad") as never)).toThrow("list() only accepts <list-item>");
-  expect(() => rm.expectTableRow(rm.paragraph("bad"))).toThrow("expectTableRow() only accepts <table-row>");
-  expect(() => rm.expectRichText("plain text")).toThrow("expectRichText() expects a rich-text element");
+  expect(() => components.expectTableRow(rm.paragraph("bad"))).toThrow("expectTableRow() only accepts <table-row>");
+  expect(() => components.expectRichText("plain text")).toThrow("expectRichText() expects a rich-text element");
   expect(() => rm.richMessage({ typo: true } as never)).toThrow('richMessage() received unknown option "typo"');
   expect(() => rm.table({ kind: "table-row", prop: {} } as never)).toThrow('table() received unknown option "kind"');
   expect(() => (rm.customEmoji as (...args: unknown[]) => unknown)({ id: "emoji", alt: "✨" }, "bad"))

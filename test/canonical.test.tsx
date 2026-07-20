@@ -28,7 +28,7 @@ import {
   TextMention,
   Underline,
   expectRichMessage,
-} from "../src/index.js";
+} from "../src/jsx.js";
 
 describe("expectRichMessage", () => {
   test("composes text blocks and nested rich text from TSX", () => {
