@@ -21,29 +21,29 @@ The API can be used with functions, a fluent builder, or TSX. All three create t
 
 ```ts
 import {
-  bold,
-  heading,
-  paragraph,
-  richMessage,
-  table,
-  tableCell,
-  tableRow,
+    bold,
+    heading,
+    paragraph,
+    richMessage,
+    table,
+    tableCell,
+    tableRow,
 } from "telegram-rich-messages/core";
 
 const input = richMessage(
-  heading({ size: 1 }, "Build report"),
-  paragraph("Status: ", bold("green")),
-  table(
-    { bordered: true, caption: "Benchmark" },
-    tableRow(
-      tableCell({ header: true }, "Model"),
-      tableCell({ header: true, align: "right" }, "Score"),
+    heading({ size: 1 }, "Build report"),
+    paragraph("Status: ", bold("green")),
+    table(
+        { bordered: true, caption: "Benchmark" },
+        tableRow(
+            tableCell({ header: true }, "Model"),
+            tableCell({ header: true, align: "right" }, "Score"),
+        ),
+        tableRow(
+            tableCell("Aster-1"),
+            tableCell({ align: "right" }, bold(98.4)),
+        ),
     ),
-    tableRow(
-      tableCell("Aster-1"),
-      tableCell({ align: "right" }, bold(98.4)),
-    ),
-  ),
 );
 ```
 
@@ -51,8 +51,8 @@ Builders preserve their value category, so TypeScript checks the hierarchy:
 
 ```ts
 table(tableRow(tableCell("valid"))); // valid
-table(paragraph("not a row"));       // type error
-bold(paragraph("not rich text"));    // type error
+table(paragraph("not a row")); // type error
+bold(paragraph("not rich text")); // type error
 ```
 
 The same checks run at runtime for JavaScript and values coming from `any`, `unknown`, or casts.
@@ -64,23 +64,27 @@ import { RichMessage } from "telegram-rich-messages/fluent";
 import { bold } from "telegram-rich-messages/core";
 
 const results = [
-  { model: "Aster-1", score: 98.4 },
-  { model: "Hermes-2", score: 97.1 },
+    { model: "Aster-1", score: 98.4 },
+    { model: "Hermes-2", score: 97.1 },
 ];
 
 const input = new RichMessage({ skipEntityDetection: true })
-  .heading("Build report", { size: 1 })
-  .paragraph("Status: ", bold("green"))
-  .table(
-    { bordered: true, caption: "Benchmark" },
-    table => table
-      .row(row => row
-        .cell("Model", { header: true })
-        .cell("Score", { header: true, align: "right" }))
-      .rows(results, (row, result) => row
-        .cell(result.model)
-        .cell(bold(result.score), { align: "right" })),
-  );
+    .heading("Build report", { size: 1 })
+    .paragraph("Status: ", bold("green"))
+    .table(
+        { bordered: true, caption: "Benchmark" },
+        (table) =>
+            table
+                .row((row) =>
+                    row
+                        .cell("Model", { header: true })
+                        .cell("Score", { header: true, align: "right" })
+                )
+                .rows(results, (row, result) =>
+                    row
+                        .cell(result.model)
+                        .cell(bold(result.score), { align: "right" })),
+    );
 ```
 
 A `RichMessage` instance `implements InputRichMessage`, so it can be passed straight to grammY (or any Bot API client); its `toJSON()` produces the canonical value on serialization. Every functional block builder has a matching method, including media (`photo`, `video`, …) and containers (`blockQuote`, `collage`, `details`, …). Use `.add(block)` to append any pre-built block value. The `blocks` getter returns a snapshot; later mutations do not change earlier results.
@@ -91,10 +95,10 @@ Point TypeScript at the package's JSX runtime:
 
 ```json
 {
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "telegram-rich-messages/jsx"
-  }
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "telegram-rich-messages/jsx"
+    }
 }
 ```
 
@@ -102,32 +106,34 @@ Point TypeScript at the package's JSX runtime:
 
 ```tsx
 import {
-  Bold,
-  Heading,
-  Paragraph,
-  RichMessage,
-  Table,
-  TableCell,
-  TableRow,
-  expectRichMessage,
+    Bold,
+    expectRichMessage,
+    Heading,
+    Paragraph,
+    RichMessage,
+    Table,
+    TableCell,
+    TableRow,
 } from "telegram-rich-messages/components";
 
 const input = expectRichMessage(
-  <RichMessage skipEntityDetection>
-    <Heading size={1}>Build report</Heading>
-    <Paragraph>Status: <Bold>green</Bold></Paragraph>
+    <RichMessage skipEntityDetection>
+        <Heading size={1}>Build report</Heading>
+        <Paragraph>
+            Status: <Bold>green</Bold>
+        </Paragraph>
 
-    <Table bordered>
-      <TableRow>
-        <TableCell header>Model</TableCell>
-        <TableCell header>Score</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell>Aster-1</TableCell>
-        <TableCell>98.4</TableCell>
-      </TableRow>
-    </Table>
-  </RichMessage>,
+        <Table bordered>
+            <TableRow>
+                <TableCell header>Model</TableCell>
+                <TableCell header>Score</TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell>Aster-1</TableCell>
+                <TableCell>98.4</TableCell>
+            </TableRow>
+        </Table>
+    </RichMessage>,
 );
 ```
 
@@ -142,28 +148,32 @@ import { bold, table, tableCell, tableRow } from "telegram-rich-messages/core";
 import { Paragraph, RichMessage } from "telegram-rich-messages/components";
 
 <RichMessage>
-  <Paragraph>Generated with TSX.</Paragraph>
-  {table(
-    { bordered: true },
-    tableRow(tableCell(bold("Generated with functions."))),
-  )}
-</RichMessage>
+    <Paragraph>Generated with TSX.</Paragraph>
+    {table(
+        { bordered: true },
+        tableRow(tableCell(bold("Generated with functions."))),
+    )}
+</RichMessage>;
 ```
 
 TypeScript widens JSX expressions to `JSX.Element`. Use a runtime narrowing guard when a JSX value needs to enter a strict functional boundary:
 
 ```tsx
 import { bold, richMessage, table } from "telegram-rich-messages/core";
-import { TableCell, TableRow, expectTableRow } from "telegram-rich-messages/components";
+import {
+    expectTableRow,
+    TableCell,
+    TableRow,
+} from "telegram-rich-messages/components";
 
 const row = (
-  <TableRow>
-    <TableCell>{bold("hybrid")}</TableCell>
-  </TableRow>
+    <TableRow>
+        <TableCell>{bold("hybrid")}</TableCell>
+    </TableRow>
 );
 
 const message = richMessage(
-  table(expectTableRow(row)),
+    table(expectTableRow(row)),
 );
 ```
 
@@ -186,15 +196,15 @@ The package has three public entrypoints:
 
 Every TSX component has a lower-camel-case builder in `core`.
 
-| Category | TSX | Functions |
-|---|---|---|
-| Root | `RichMessage` | `richMessage` |
-| Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer` | `paragraph`, `heading`, `pre`, `footer` |
-| Structure | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details` | `divider`, `mathBlock`, `blockAnchor`, `list`, `listItem`, `blockQuote`, `pullQuote`, `details` |
-| Layout | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map` | `collage`, `slideshow`, `table`, `tableRow`, `tableCell`, `map` |
-| Media | `Animation`, `Audio`, `Photo`, `Video`, `VoiceNote` | `animation`, `audio`, `photo`, `video`, `voiceNote` |
-| Styling | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code` | `bold`, `italic`, `underline`, `strikethrough`, `spoiler`, `subscript`, `superscript`, `marked`, `code` |
-| Entities | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` | `dateTime`, `textMention`, `customEmoji`, `inlineMath`, `link`, `email`, `phone`, `bankCard`, `mention`, `hashtag`, `cashtag`, `botCommand`, `textAnchor`, `anchorLink`, `reference`, `referenceLink` |
+| Category    | TSX                                                                                                                                                                                                   | Functions                                                                                                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root        | `RichMessage`                                                                                                                                                                                         | `richMessage`                                                                                                                                                                                         |
+| Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer`                                                                                                                                                               | `paragraph`, `heading`, `pre`, `footer`                                                                                                                                                               |
+| Structure   | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details`                                                                                                       | `divider`, `mathBlock`, `blockAnchor`, `list`, `listItem`, `blockQuote`, `pullQuote`, `details`                                                                                                       |
+| Layout      | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map`                                                                                                                                       | `collage`, `slideshow`, `table`, `tableRow`, `tableCell`, `map`                                                                                                                                       |
+| Media       | `Animation`, `Audio`, `Photo`, `Video`, `VoiceNote`                                                                                                                                                   | `animation`, `audio`, `photo`, `video`, `voiceNote`                                                                                                                                                   |
+| Styling     | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code`                                                                                               | `bold`, `italic`, `underline`, `strikethrough`, `spoiler`, `subscript`, `superscript`, `marked`, `code`                                                                                               |
+| Entities    | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` | `dateTime`, `textMention`, `customEmoji`, `inlineMath`, `link`, `email`, `phone`, `bankCard`, `mention`, `hashtag`, `cashtag`, `botCommand`, `textAnchor`, `anchorLink`, `reference`, `referenceLink` |
 
 Props use camelCase. Builders immediately produce the Bot API's snake_case fields.
 
