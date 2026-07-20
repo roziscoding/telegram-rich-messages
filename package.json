@@ -5,6 +5,10 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
+    ".": {
+      "types": "./dist/mod.d.ts",
+      "import": "./dist/mod.js"
+    },
     "./core": {
       "types": "./dist/core.d.ts",
       "import": "./dist/core.js"
@@ -28,7 +32,7 @@
   },
   "files": ["dist"],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "check": "bun run build && tsc --noEmit && bun test",
     "test": "bun run build && bun test"
   },
@@ -48,5 +52,8 @@
   },
   "dependencies": {
     "@grammyjs/types": "4.0.0"
+  },
+  "peerDependencies": {
+    "grammy": "^1.45.1"
   }
 }
