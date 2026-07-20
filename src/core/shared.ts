@@ -1,10 +1,10 @@
-import type { RichBlockCaption, RichText } from "../deps";
+import type { InputFile, RichBlockCaption, RichText } from "../deps";
 import { kindOf, type BlockValue, type ListItemValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../core/values";
 
 export type OptionalNested<T> = T | boolean | null | undefined | readonly OptionalNested<T>[];
 export type RichTextInput = OptionalNested<string | number | RichTextValue>;
-export type BlockInput<F = string> = OptionalNested<BlockValue<F>>;
-export type ListItemInput<F = string> = OptionalNested<ListItemValue<F>>;
+export type BlockInput<F = InputFile> = OptionalNested<BlockValue<F>>;
+export type ListItemInput<F = InputFile> = OptionalNested<ListItemValue<F>>;
 export type TableCellInput = OptionalNested<TableCellValue>;
 export type TableRowInput = OptionalNested<TableRowValue>;
 
@@ -51,7 +51,7 @@ function collectBranded<T>(values: readonly unknown[], kind: string, context: st
   return result;
 }
 
-export function blocks<F = string>(values: readonly unknown[], context: string): BlockValue<F>[] {
+export function blocks<F = InputFile>(values: readonly unknown[], context: string): BlockValue<F>[] {
   if (context === "richMessage()") {
     const result: BlockValue<F>[] = [];
     for (const item of flattenInputs(values)) {
@@ -63,7 +63,7 @@ export function blocks<F = string>(values: readonly unknown[], context: string):
   }
   return collectBranded<BlockValue<F>>(values, "block", context);
 }
-export function listItems<F = string>(values: readonly unknown[], context: string): ListItemValue<F>[] {
+export function listItems<F = InputFile>(values: readonly unknown[], context: string): ListItemValue<F>[] {
   return collectBranded<ListItemValue<F>>(values, "list-item", context);
 }
 export function tableRows(values: readonly unknown[], context: string): TableRowValue[] {

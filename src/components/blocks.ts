@@ -1,5 +1,6 @@
 import type { Child, ElementChild } from "./jsx-runtime";
 import type {
+  InputFile,
   InputMediaAnimation,
   InputMediaAudio,
   InputMediaPhoto,
@@ -51,8 +52,8 @@ import type { CaptionProps, ChildrenProps, ElementChildrenProps, NoChildrenProps
 function richChildren(children: Child): RichTextInput[] {
   return children === undefined ? [] : [children as RichTextInput];
 }
-function blockChildren(children: ElementChild): BlockInput<string>[] {
-  return children === undefined ? [] : [children as BlockInput<string>];
+function blockChildren(children: ElementChild): BlockInput<InputFile>[] {
+  return children === undefined ? [] : [children as BlockInput<InputFile>];
 }
 
 function forbiddenChildren(children: unknown): never[] {
@@ -113,19 +114,19 @@ export function Details({ children, summary, open }: ElementChildrenProps & { su
 export function Map({ children, ...options }: { location: Location; zoom: number; width: number; height: number } & CaptionProps & NoChildrenProps) {
   return mapBuilder(options as Parameters<typeof mapBuilder>[0], ...forbiddenChildren(children));
 }
-export function Animation({ children, ...options }: { media: InputMediaAnimation<string> } & CaptionProps & NoChildrenProps) {
+export function Animation({ children, ...options }: { media: InputMediaAnimation<InputFile> } & CaptionProps & NoChildrenProps) {
   return animation(options as AnimationOptions, ...forbiddenChildren(children));
 }
-export function Audio({ children, ...options }: { media: InputMediaAudio<string> } & CaptionProps & NoChildrenProps) {
+export function Audio({ children, ...options }: { media: InputMediaAudio<InputFile> } & CaptionProps & NoChildrenProps) {
   return audio(options as AudioOptions, ...forbiddenChildren(children));
 }
-export function Photo({ children, ...options }: { media: InputMediaPhoto<string> } & CaptionProps & NoChildrenProps) {
+export function Photo({ children, ...options }: { media: InputMediaPhoto<InputFile> } & CaptionProps & NoChildrenProps) {
   return photo(options as PhotoOptions, ...forbiddenChildren(children));
 }
-export function Video({ children, ...options }: { media: InputMediaVideo<string> } & CaptionProps & NoChildrenProps) {
+export function Video({ children, ...options }: { media: InputMediaVideo<InputFile> } & CaptionProps & NoChildrenProps) {
   return video(options as VideoOptions, ...forbiddenChildren(children));
 }
-export function VoiceNote({ children, ...options }: { media: InputMediaVoiceNote<string> } & CaptionProps & NoChildrenProps) {
+export function VoiceNote({ children, ...options }: { media: InputMediaVoiceNote<InputFile> } & CaptionProps & NoChildrenProps) {
   return voiceNote(options as VoiceNoteOptions, ...forbiddenChildren(children));
 }
 

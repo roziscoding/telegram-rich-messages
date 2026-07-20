@@ -1,3 +1,4 @@
+export type { InputFile } from "grammy";
 export type {
   InputMediaAnimation,
   InputMediaAudio,

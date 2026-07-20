@@ -37,10 +37,10 @@ import { richMessage, type RichMessageOptions } from "../core/message";
 import type { RichTextInput } from "../core/text";
 import { blocks as normalizeBlocks } from "../core/shared";
 import { cloneValue, type BlockValue, type RichMessageValue } from "../core/values";
-import type { InputRichMessage } from "../deps";
+import type { InputFile, InputRichMessage } from "../deps";
 import { TableBuilder, type TableConfigurator } from "./table";
 
-export class RichMessage implements InputRichMessage<string> {
+export class RichMessage implements InputRichMessage<InputFile> {
   readonly #options: RichMessageOptions;
   readonly #blocks: BlockValue[] = [];
 
