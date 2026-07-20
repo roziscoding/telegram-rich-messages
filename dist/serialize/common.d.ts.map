@@ -1,0 +1,1 @@
+{"version":3,"file":"common.d.ts","sourceRoot":"","sources":["../../src/serialize/common.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,KAAK,EAAE,IAAI,EAAE,MAAM,mBAAmB,CAAC;AAErD,wBAAgB,OAAO,CAAC,KAAK,EAAE,KAAK,GAAG,OAAO,CAAC,KAAK,EAAE,SAAS,KAAK,EAAE,CAAC,EAAE,CAGxE;AAED,wBAAgB,UAAU,CAAC,KAAK,EAAE,KAAK,EAAE,OAAO,EAAE,MAAM,GAAG,IAAI,EAAE,CAWhE"}

@@ -196,6 +196,18 @@ Component props use idiomatic camelCase; `render()` converts them to the Bot API
 
 ## Development
 
+The source is organized by responsibility:
+
+```text
+src/
+├── components/   # Public TSX component factories
+├── serialize/    # Rich-text and block serializer registries
+├── render.ts     # RichMessage root conversion
+├── types.ts      # Public Bot API output and media types
+├── jsx-runtime.ts
+└── index.ts      # Public package exports only
+```
+
 ```sh
 bun install
 bun run check
