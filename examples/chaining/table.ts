@@ -1,7 +1,7 @@
 import { bold } from "../../src/core.ts";
-import { RichMessage } from "../../src/fluent.ts";
+import { RichMessage } from "../../src/chaining.ts";
 
-// The fluent table() method takes a configurator that receives a TableBuilder.
+// The chaining table() method takes a configurator that receives a TableBuilder.
 // Each row() gets a TableRowBuilder whose cell() calls accept content and
 // per-cell options.
 export const withTable = new RichMessage()

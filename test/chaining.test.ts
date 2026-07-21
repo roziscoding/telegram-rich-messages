@@ -1,6 +1,6 @@
 import { expect } from "@std/expect";
 import { it as test } from "@std/testing/bdd";
-import { RichMessage, TableBuilder } from "../src/fluent.ts";
+import { RichMessage, TableBuilder } from "../src/chaining.ts";
 import {
     bold,
     type InputRichBlockParagraph,
@@ -14,7 +14,7 @@ const results = [
     { model: "Hermes-2", score: 97.1 },
 ];
 
-test("fluent builders accumulate canonical blocks through contextual table builders", () => {
+test("chaining builders accumulate canonical blocks through contextual table builders", () => {
     const input: InputRichMessage = new RichMessage({
         skipEntityDetection: true,
     })
@@ -84,7 +84,7 @@ test("fluent builders accumulate canonical blocks through contextual table build
     });
 });
 
-test("fluent serializations and block snapshots do not change retroactively", () => {
+test("chaining serializations and block snapshots do not change retroactively", () => {
     const external = paragraph("first");
     const builder = new RichMessage().add(external);
     const blocks = builder.blocks;
@@ -116,7 +116,7 @@ test("table builds and row snapshots do not share mutable cells", () => {
     expect(second.cells[0]![0]!.text).toBe("first");
 });
 
-test("fluent builders preserve runtime hierarchy validation", () => {
+test("chaining builders preserve runtime hierarchy validation", () => {
     expect(() => new RichMessage().add(bold("not a block") as never))
         .toThrow("RichMessage.add() only accepts <block>");
 });

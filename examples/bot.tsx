@@ -9,7 +9,7 @@ import {
     TableCell,
     TableRow,
 } from "../src/components.ts";
-import { RichMessage as RichMessageBuilder } from "../src/fluent.ts";
+import { RichMessage as RichMessageBuilder } from "../src/chaining.ts";
 import {
     bold,
     paragraph,
@@ -47,7 +47,7 @@ bot.command("components", (ctx) => {
     return ctx.replyWithRichMessage(message);
 });
 
-bot.command("fluent", (ctx) => {
+bot.command("chaining", (ctx) => {
     const message = new RichMessageBuilder()
         .paragraph(
             "Hello, ",

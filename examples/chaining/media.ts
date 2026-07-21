@@ -1,7 +1,7 @@
 import { photo } from "../../src/core.ts";
-import { RichMessage } from "../../src/fluent.ts";
+import { RichMessage } from "../../src/chaining.ts";
 
-// Media and container blocks are first-class fluent methods, so they can be
+// Media and container blocks are first-class chaining methods, so they can be
 // composed inline without falling back to add(). The photo() calls nested in
 // collage() still come from the core builders, because collage children are
 // block values.

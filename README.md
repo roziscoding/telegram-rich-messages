@@ -1,6 +1,6 @@
 # grammy-rich-messages
 
-Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) for [grammY](https://grammy.dev) with typed functions, a fluent builder, TSX, or any combination, then send them with grammY's `ctx.replyWithRichMessage(...)` or any Bot API client.
+Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) for [grammY](https://grammy.dev) with typed functions, a chaining builder, TSX, or any combination, then send them with grammY's `ctx.replyWithRichMessage(...)` or any Bot API client.
 
 - Built on grammY's own [`grammy/types`](https://grammy.dev) — builders return those exact objects, ready to send with grammY or any Bot API client
 - No React or virtual DOM
@@ -44,16 +44,16 @@ bot.command("start", (ctx) =>
 bot.start();
 ```
 
-`richMessage` takes blocks — from functions, TSX, or a mix — and returns an `InputRichMessage` ready to send; passed an already-composed rich message it validates and returns it unchanged. A `RichMessage` fluent instance can be handed to `ctx.replyWithRichMessage` directly.
+`richMessage` takes blocks — from functions, TSX, or a mix — and returns an `InputRichMessage` ready to send; passed an already-composed rich message it validates and returns it unchanged. A `RichMessage` chaining instance can be handed to `ctx.replyWithRichMessage` directly.
 
-See [`examples/bot.tsx`](./examples/bot.tsx) for the same handler written with the functional, fluent, and TSX APIs.
+See [`examples/bot.tsx`](./examples/bot.tsx) for the same handler written with the functional, chaining, and TSX APIs.
 
 ## Usage
 
-The API can be used with functions, a fluent builder, or TSX. All three create the same canonical values and use the same runtime validation.
+The API can be used with functions, a chaining builder, or TSX. All three create the same canonical values and use the same runtime validation.
 
 - **[Functional API](#functional-api):** provides the strongest TypeScript guarantees because each builder preserves its exact value category, allowing invalid nesting to be caught at compile time. Deeply nested messages, however, can be harder to scan.
-- **[Fluent API](#fluent-api):** accumulates canonical blocks directly and uses contextual builders for tables.
+- **[Chaining API](#chaining-api):** accumulates canonical blocks directly and uses contextual builders for tables.
 - **[TSX](#tsx):** mirrors the message structure and works naturally with arrays, conditions, fragments, and custom components. TypeScript widens JSX expressions to `JSX.Element`, so parent-child hierarchy is checked at runtime instead of compile time.
 
 ### Functional API
@@ -96,10 +96,10 @@ bold(paragraph("not rich text")); // type error
 
 The same checks run at runtime for JavaScript and values coming from `any`, `unknown`, or casts.
 
-### Fluent API
+### Chaining API
 
 ```ts
-import { RichMessage } from "grammy-rich-messages/fluent";
+import { RichMessage } from "grammy-rich-messages/chaining";
 import { bold } from "grammy-rich-messages/core";
 
 const results = [
@@ -230,7 +230,7 @@ The package has three public entrypoints:
 
 - `grammy-rich-messages/core` — functional builders, the `richMessage` root, and the Telegram types (re-exported from `grammy/types`)
 - `grammy-rich-messages/components` — TSX components, the `richMessage` root, and narrowing guards
-- `grammy-rich-messages/fluent` — `RichMessage`, `TableBuilder`, and `TableRowBuilder`
+- `grammy-rich-messages/chaining` — `RichMessage`, `TableBuilder`, and `TableRowBuilder`
 
 Every TSX component has a lower-camel-case builder in `core`. The message root is the `richMessage` function — there is no `RichMessage` component. `core` exports a strict `richMessage` that only accepts block values, so invalid children are caught at compile time; `components` exports one that also accepts TSX `JSX.Element` children and validates the composition at runtime. Both return the same value.
 

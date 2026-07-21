@@ -1,10 +1,10 @@
 import { expect } from "@std/expect";
 import { it as test } from "@std/testing/bdd";
-import * as builder from "../src/fluent.ts";
+import * as builder from "../src/chaining.ts";
 import * as core from "../src/core.ts";
 import * as jsx from "../src/components.ts";
 
-test("public entrypoints expose separate functional, JSX, and fluent surfaces", () => {
+test("public entrypoints expose separate functional, JSX, and chaining surfaces", () => {
     expect(typeof core.richMessage).toBe("function");
     expect(typeof core.paragraph).toBe("function");
     expect("RichMessage" in core).toBe(false);

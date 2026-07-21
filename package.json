@@ -1,7 +1,7 @@
 {
     "name": "grammy-rich-messages",
     "version": "0.1.0",
-    "description": "Compose Telegram Bot API rich messages with typed functions, fluent builders, and TSX",
+    "description": "Compose Telegram Bot API rich messages with typed functions, chaining builders, and TSX",
     "type": "commonjs",
     "sideEffects": false,
     "exports": {
@@ -13,9 +13,9 @@
             "types": "./out/components.d.ts",
             "default": "./out/components.js"
         },
-        "./fluent": {
-            "types": "./out/fluent.d.ts",
-            "default": "./out/fluent.js"
+        "./chaining": {
+            "types": "./out/chaining.d.ts",
+            "default": "./out/chaining.js"
         },
         "./jsx/jsx-runtime": {
             "types": "./out/components/jsx-runtime.d.ts",
