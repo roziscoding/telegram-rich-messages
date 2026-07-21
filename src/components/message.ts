@@ -7,16 +7,27 @@ import type { RichMessageValue } from "../core/values.ts";
 import type { ElementChild } from "./jsx-runtime.ts";
 
 /**
- * TSX-facing message root. Accepts `JSX.Element` children — which TypeScript
- * widens away from `BlockValue` — delegates construction to the strict core
- * `richMessage`, then validates the composed value with {@link expectRichMessage}.
- * Core's `richMessage` keeps its compile-time block-only guarantees for
- * functional callers; this entry trades them for runtime validation so TSX
- * elements can be passed directly.
+ * Assembles block elements and `JSX.Element` children into an
+ * `InputRichMessage` ready to send. This is the components entrypoint's
+ * root, which also accepts `JSX.Element` children and validates the
+ * composition at runtime, unlike the strict functional root in
+ * `grammy-rich-messages/core`.
+ *
+ * @param children Block elements and JSX children to compose into the message
  */
 export function richMessage(
     ...children: readonly ElementChild[]
 ): RichMessageValue;
+/**
+ * Assembles block elements and `JSX.Element` children into an
+ * `InputRichMessage` ready to send, applying the given message options.
+ * This is the components entrypoint's root, which also accepts
+ * `JSX.Element` children and validates the composition at runtime, unlike
+ * the strict functional root in `grammy-rich-messages/core`.
+ *
+ * @param options Message-level options applied to the composed message
+ * @param children Block elements and JSX children to compose into the message
+ */
 export function richMessage(
     options: RichMessageOptions,
     ...children: readonly ElementChild[]

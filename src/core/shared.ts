@@ -8,16 +8,44 @@ import {
     type TableRowValue,
 } from "../core/values.ts";
 
+/**
+ * A builder argument that accepts a value of type `T`, or `null`,
+ * `undefined`, or a boolean, or arbitrarily nested arrays of any of these.
+ * Nested arrays are flattened and the `null`, `undefined`, and boolean
+ * entries are skipped, so conditional expressions like `cond && child` can be
+ * passed inline.
+ */
 export type OptionalNested<T> =
     | T
     | boolean
     | null
     | undefined
     | readonly OptionalNested<T>[];
+/**
+ * What the rich-text builders accept: strings and numbers (coerced to text)
+ * or {@link RichTextValue}s, plus the skippable and nested forms of
+ * {@link OptionalNested}.
+ */
 export type RichTextInput = OptionalNested<string | number | RichTextValue>;
+/**
+ * What the block builders accept: {@link BlockValue}s, plus the skippable and
+ * nested forms of {@link OptionalNested}.
+ */
 export type BlockInput = OptionalNested<BlockValue>;
+/**
+ * What the list builders accept: {@link ListItemValue}s, plus the skippable
+ * and nested forms of {@link OptionalNested}.
+ */
 export type ListItemInput = OptionalNested<ListItemValue>;
+/**
+ * What the table-row builder accepts as cells: {@link TableCellValue}s, plus
+ * the skippable and nested forms of {@link OptionalNested}.
+ */
 export type TableCellInput = OptionalNested<TableCellValue>;
+/**
+ * What the table builder accepts as rows: {@link TableRowValue}s, plus the
+ * skippable and nested forms of {@link OptionalNested}.
+ */
 export type TableRowInput = OptionalNested<TableRowValue>;
 
 export function flattenInputs(values: readonly unknown[]): unknown[] {
