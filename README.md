@@ -15,10 +15,10 @@ Rich message plugin for the [grammY](https://grammy.dev) Telegram bot framework.
 npm install grammy-rich-messages
 ```
 
-Deno consumers import straight from npm:
+Deno consumers import from deno.land/x:
 
 ```ts
-import { richMessages } from "npm:grammy-rich-messages";
+import { richMessages } from "https://deno.land/x/grammy_rich_messages/mod.ts";
 ```
 
 `grammy` is a peer dependency; install it alongside the plugin when sending messages through a bot.
