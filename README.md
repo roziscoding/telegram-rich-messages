@@ -43,8 +43,7 @@ bot.command("start", (ctx) =>
                 Hello, <Bold>{ctx.from?.first_name ?? "there"}!</Bold>
             </Paragraph>
         </RichMessage>,
-    )
-);
+    ));
 
 bot.start();
 ```
