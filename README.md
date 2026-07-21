@@ -1,8 +1,7 @@
 # grammy-rich-messages
 
-Rich message plugin for the [grammY](https://grammy.dev) Telegram bot framework. Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, a fluent builder, TSX, or any combination, then send them with a single `ctx.replyRich(...)`.
+Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) for [grammY](https://grammy.dev) with typed functions, a fluent builder, TSX, or any combination, then send them with grammY's `ctx.replyWithRichMessage(...)` or any Bot API client.
 
-- Adds `ctx.replyRich` to grammY through a small middleware; the composition API also works standalone with any Bot API client
 - Built on grammY's own [`grammy/types`](https://grammy.dev) — builders return those exact objects, ready to send with grammY or any Bot API client
 - No React or virtual DOM
 - Compile-time hierarchy checks with functional builders
@@ -18,37 +17,34 @@ npm install grammy-rich-messages
 Deno consumers import from deno.land/x:
 
 ```ts
-import { richMessages } from "https://deno.land/x/grammy_rich_messages/mod.ts";
+import { richMessage } from "https://deno.land/x/grammy_rich_messages/core.ts";
 ```
 
-`grammy` is a peer dependency; install it alongside the plugin when sending messages through a bot.
+`grammy` is a peer dependency; install it alongside this package when sending messages through a bot.
 
-## Plugin
+## Sending
 
-Register the `richMessages` middleware, then reply with any composed value — a functional builder, a `RichMessage` fluent instance, or TSX — through `ctx.replyRich`:
+Compose a value with any of the APIs below, then send it through grammY's `ctx.replyWithRichMessage` (or any Bot API client):
 
 ```tsx
 import { Bot } from "grammy";
-import { richMessages, type RichMessagesFlavor } from "grammy-rich-messages";
-import { Bold, Paragraph, RichMessage } from "grammy-rich-messages/components";
+import { Bold, Paragraph, richMessage } from "grammy-rich-messages/components";
 
-const bot = new Bot<RichMessagesFlavor>(process.env.TELEGRAM_TOKEN!);
-
-bot.use(richMessages);
+const bot = new Bot(process.env.TELEGRAM_TOKEN!);
 
 bot.command("start", (ctx) =>
-    ctx.replyRich(
-        <RichMessage>
+    ctx.replyWithRichMessage(
+        richMessage(
             <Paragraph>
                 Hello, <Bold>{ctx.from?.first_name ?? "there"}!</Bold>
-            </Paragraph>
-        </RichMessage>,
+            </Paragraph>,
+        ),
     ));
 
 bot.start();
 ```
 
-`RichMessagesFlavor` extends the context with `replyRich(message)`, which accepts an `InputRichMessage` or a TSX `JSX.Element` and sends it as a rich message. Without the plugin you can still build values and send them yourself with any Bot API client.
+`richMessage` takes blocks — from functions, TSX, or a mix — and returns an `InputRichMessage` ready to send; passed an already-composed rich message it validates and returns it unchanged. A `RichMessage` fluent instance can be handed to `ctx.replyWithRichMessage` directly.
 
 See [`examples/bot.tsx`](./examples/bot.tsx) for the same handler written with the functional, fluent, and TSX APIs.
 
@@ -150,35 +146,34 @@ Point TypeScript at the package's JSX runtime:
 ```tsx
 import {
     Bold,
-    expectRichMessage,
     Heading,
     Paragraph,
-    RichMessage,
+    richMessage,
     Table,
     TableCell,
     TableRow,
 } from "grammy-rich-messages/components";
 
-const input = expectRichMessage(
-    <RichMessage skipEntityDetection>
-        <Heading size={1}>Build report</Heading>
-        <Paragraph>
-            Status: <Bold>green</Bold>
-        </Paragraph>
-
-        <Table bordered>
-            <TableRow>
-                <TableCell header>Model</TableCell>
-                <TableCell header>Score</TableCell>
-            </TableRow>
-            <TableRow>
-                <TableCell>Aster-1</TableCell>
-                <TableCell>98.4</TableCell>
-            </TableRow>
-        </Table>
-    </RichMessage>,
+const input = richMessage(
+    { skipEntityDetection: true },
+    <Heading size={1}>Build report</Heading>,
+    <Paragraph>
+        Status: <Bold>green</Bold>
+    </Paragraph>,
+    <Table bordered>
+        <TableRow>
+            <TableCell header>Model</TableCell>
+            <TableCell header>Score</TableCell>
+        </TableRow>
+        <TableRow>
+            <TableCell>Aster-1</TableCell>
+            <TableCell>98.4</TableCell>
+        </TableRow>
+    </Table>,
 );
 ```
+
+`richMessage` is the message root for TSX too: pass block elements as arguments, optionally preceded by an options object. It accepts `JSX.Element` children and validates the composition at runtime.
 
 Arrays, fragments, conditional children, and custom components work normally.
 
@@ -188,15 +183,15 @@ Functional values can go directly inside TSX:
 
 ```tsx
 import { bold, table, tableCell, tableRow } from "grammy-rich-messages/core";
-import { Paragraph, RichMessage } from "grammy-rich-messages/components";
+import { Paragraph, richMessage } from "grammy-rich-messages/components";
 
-<RichMessage>
-    <Paragraph>Generated with TSX.</Paragraph>
-    {table(
+richMessage(
+    <Paragraph>Generated with TSX.</Paragraph>,
+    table(
         { bordered: true },
         tableRow(tableCell(bold("Generated with functions."))),
-    )}
-</RichMessage>;
+    ),
+);
 ```
 
 TypeScript widens JSX expressions to `JSX.Element`. Use a runtime narrowing guard when a JSX value needs to enter a strict functional boundary:
@@ -231,18 +226,17 @@ Available guards:
 
 ## API
 
-The package has four public entrypoints:
+The package has three public entrypoints:
 
-- `grammy-rich-messages` — the grammY plugin: the `richMessages` middleware and `RichMessagesFlavor`
-- `grammy-rich-messages/core` — functional builders and the Telegram types (re-exported from `grammy/types`)
-- `grammy-rich-messages/components` — TSX components and narrowing guards
+- `grammy-rich-messages/core` — functional builders, the `richMessage` root, and the Telegram types (re-exported from `grammy/types`)
+- `grammy-rich-messages/components` — TSX components, the `richMessage` root, and narrowing guards
 - `grammy-rich-messages/fluent` — `RichMessage`, `TableBuilder`, and `TableRowBuilder`
 
-Every TSX component has a lower-camel-case builder in `core`.
+Every TSX component has a lower-camel-case builder in `core`. The message root is the `richMessage` function — there is no `RichMessage` component. `core` exports a strict `richMessage` that only accepts block values, so invalid children are caught at compile time; `components` exports one that also accepts TSX `JSX.Element` children and validates the composition at runtime. Both return the same value.
 
 | Category    | TSX                                                                                                                                                                                                   | Functions                                                                                                                                                                                             |
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Root        | `RichMessage`                                                                                                                                                                                         | `richMessage`                                                                                                                                                                                         |
+| Root        | `richMessage(...)`                                                                                                                                                                                    | `richMessage`                                                                                                                                                                                         |
 | Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer`                                                                                                                                                               | `paragraph`, `heading`, `pre`, `footer`                                                                                                                                                               |
 | Structure   | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details`                                                                                                       | `divider`, `mathBlock`, `blockAnchor`, `list`, `listItem`, `blockQuote`, `pullQuote`, `details`                                                                                                       |
 | Layout      | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map`                                                                                                                                       | `collage`, `slideshow`, `table`, `tableRow`, `tableCell`, `map`                                                                                                                                       |
@@ -271,7 +265,7 @@ deno task test
 
 ## Scope
 
-This package builds rich-message objects and adds a thin grammY plugin to send them. Authentication, HTTP calls, retries, webhooks, and polling remain grammY's responsibility.
+This package builds rich-message objects. Sending them — authentication, HTTP calls, retries, webhooks, and polling — remains grammY's (or your Bot API client's) responsibility.
 
 ## License
 

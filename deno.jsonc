@@ -11,7 +11,7 @@
         "@std/testing": "jsr:@std/testing@^1"
     },
     "tasks": {
-        "check": "deno check --allow-import src/mod.ts src/core.ts src/components.ts src/fluent.ts test/ examples/",
+        "check": "deno check --allow-import src/core.ts src/components.ts src/fluent.ts test/ examples/",
         "test": "deno test --allow-import",
         "ok": "deno fmt --check && deno lint && deno task test && deno task check"
     },

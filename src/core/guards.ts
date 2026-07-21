@@ -44,7 +44,7 @@ export function expectTableCell(value: unknown): TableCellValue {
 }
 export function expectRichMessage(value: unknown): RichMessageValue {
     if (kindOf(value) !== "rich-message") {
-        throw new TypeError("expectRichMessage() expects a <RichMessage> root");
+        throw new TypeError("expectRichMessage() expects a richMessage() root");
     }
     return value as RichMessageValue;
 }

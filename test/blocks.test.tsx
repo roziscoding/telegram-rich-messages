@@ -9,7 +9,6 @@ import {
     Collage,
     Details,
     Divider,
-    expectRichMessage,
     Footer,
     Heading,
     List,
@@ -20,7 +19,7 @@ import {
     Photo,
     Pre,
     PullQuote,
-    RichMessage,
+    richMessage,
     Slideshow,
     Table,
     TableCell,
@@ -46,8 +45,9 @@ const audio = { type: "audio" as const, media: "audio-file-id", title: "Song" };
 const voiceNote = { type: "voice_note" as const, media: "voice-file-id" };
 
 test("builds every InputRichBlock variant", () => {
-    const output = expectRichMessage(
-        <RichMessage isRtl>
+    const output = richMessage(
+        { isRtl: true },
+        <>
             <Heading size={2}>Title</Heading>
             <Pre language="ts">const answer = 42;</Pre>
             <Footer>Fine print</Footer>
@@ -102,7 +102,7 @@ test("builds every InputRichBlock variant", () => {
             <Thinking>
                 <CustomThinkingText />
             </Thinking>
-        </RichMessage>,
+        </>,
     );
 
     expect(output.is_rtl).toBe(true);

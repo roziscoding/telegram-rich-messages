@@ -4,12 +4,7 @@
     "description": "Compose Telegram Bot API rich messages with typed functions, fluent builders, and TSX",
     "type": "commonjs",
     "sideEffects": false,
-    "main": "./out/mod.js",
     "exports": {
-        ".": {
-            "types": "./out/mod.d.ts",
-            "default": "./out/mod.js"
-        },
         "./core": {
             "types": "./out/core.d.ts",
             "default": "./out/core.js"

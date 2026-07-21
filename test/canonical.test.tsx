@@ -10,7 +10,6 @@ import {
     CustomEmoji,
     DateTime,
     Email,
-    expectRichMessage,
     Hashtag,
     InlineMath,
     Italic,
@@ -21,7 +20,7 @@ import {
     Phone,
     Reference,
     ReferenceLink,
-    RichMessage,
+    richMessage,
     Spoiler,
     Strikethrough,
     Subscript,
@@ -31,14 +30,13 @@ import {
     Underline,
 } from "../src/components.ts";
 
-describe("expectRichMessage", () => {
+describe("richMessage", () => {
     test("composes text blocks and nested rich text from TSX", () => {
-        const output = expectRichMessage(
-            <RichMessage skipEntityDetection>
-                <Paragraph>
-                    Hello, <Bold>Telegram</Bold>!
-                </Paragraph>
-            </RichMessage>,
+        const output = richMessage(
+            { skipEntityDetection: true },
+            <Paragraph>
+                Hello, <Bold>Telegram</Bold>!
+            </Paragraph>,
         );
 
         expect(JSON.parse(JSON.stringify(output))).toEqual({
@@ -54,35 +52,33 @@ describe("expectRichMessage", () => {
 
     test("builds every rich-text entity with Bot API field names", () => {
         const user = { id: 42, is_bot: false, first_name: "Ada" };
-        const output = expectRichMessage(
-            <RichMessage>
-                <Paragraph>
-                    <Italic>i</Italic>
-                    <Underline>u</Underline>
-                    <Strikethrough>s</Strikethrough>
-                    <Spoiler>secret</Spoiler>
-                    <DateTime unixTime={0} format="wDt">epoch</DateTime>
-                    <TextMention user={user}>Ada</TextMention>
-                    <Subscript>2</Subscript>
-                    <Superscript>3</Superscript>
-                    <Marked>mark</Marked>
-                    <Code>code</Code>
-                    <CustomEmoji id="emoji-id" alt="✨" />
-                    <InlineMath expression="x^2" />
-                    <Link url="https://telegram.org">link</Link>
-                    <Email address="a@example.com">mail</Email>
-                    <Phone number="+1555">call</Phone>
-                    <BankCard number="4242">card</BankCard>
-                    <Mention username="telegram">@telegram</Mention>
-                    <Hashtag value="bots">#bots</Hashtag>
-                    <Cashtag value="TON">$TON</Cashtag>
-                    <BotCommand command="start">/start</BotCommand>
-                    <TextAnchor name="intro" />
-                    <AnchorLink name="intro">back</AnchorLink>
-                    <Reference name="note">note body</Reference>
-                    <ReferenceLink name="note">[1]</ReferenceLink>
-                </Paragraph>
-            </RichMessage>,
+        const output = richMessage(
+            <Paragraph>
+                <Italic>i</Italic>
+                <Underline>u</Underline>
+                <Strikethrough>s</Strikethrough>
+                <Spoiler>secret</Spoiler>
+                <DateTime unixTime={0} format="wDt">epoch</DateTime>
+                <TextMention user={user}>Ada</TextMention>
+                <Subscript>2</Subscript>
+                <Superscript>3</Superscript>
+                <Marked>mark</Marked>
+                <Code>code</Code>
+                <CustomEmoji id="emoji-id" alt="✨" />
+                <InlineMath expression="x^2" />
+                <Link url="https://telegram.org">link</Link>
+                <Email address="a@example.com">mail</Email>
+                <Phone number="+1555">call</Phone>
+                <BankCard number="4242">card</BankCard>
+                <Mention username="telegram">@telegram</Mention>
+                <Hashtag value="bots">#bots</Hashtag>
+                <Cashtag value="TON">$TON</Cashtag>
+                <BotCommand command="start">/start</BotCommand>
+                <TextAnchor name="intro" />
+                <AnchorLink name="intro">back</AnchorLink>
+                <Reference name="note">note body</Reference>
+                <ReferenceLink name="note">[1]</ReferenceLink>
+            </Paragraph>,
         );
 
         const first = output.blocks![0];

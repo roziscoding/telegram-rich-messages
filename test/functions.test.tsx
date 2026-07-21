@@ -62,19 +62,18 @@ test("JSX rich-text components delegate runtime validation to functional builder
 });
 
 test("JSX and functional syntax create the same canonical Telegram value", () => {
-    const jsx = (
-        <components.RichMessage skipEntityDetection>
-            <components.Table
-                bordered
-                caption={<components.Bold>Benchmark</components.Bold>}
-            >
-                <components.TableRow>
-                    <components.TableCell header align="right">
-                        <components.Italic>98.4</components.Italic>
-                    </components.TableCell>
-                </components.TableRow>
-            </components.Table>
-        </components.RichMessage>
+    const jsx = components.richMessage(
+        { skipEntityDetection: true },
+        <components.Table
+            bordered
+            caption={<components.Bold>Benchmark</components.Bold>}
+        >
+            <components.TableRow>
+                <components.TableCell header align="right">
+                    <components.Italic>98.4</components.Italic>
+                </components.TableCell>
+            </components.TableRow>
+        </components.Table>,
     );
     const functional = rm.richMessage(
         { skipEntityDetection: true },

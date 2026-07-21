@@ -1,20 +1,12 @@
-import {
-    Bold,
-    expectRichMessage,
-    Heading,
-    Paragraph,
-    RichMessage,
-} from "../../src/components.ts";
+import { Bold, Heading, Paragraph, richMessage } from "../../src/components.ts";
 
-// The components interface is the same builders exposed as JSX. `expectRichMessage`
-// narrows the root element to a rich-message value at runtime.
-export const simple = expectRichMessage(
-    <RichMessage>
-        <Heading size={1}>Welcome</Heading>
-        <Paragraph>
-            Hello from <Bold>grammy-rich-messages</Bold>.
-        </Paragraph>
-    </RichMessage>,
+// The components interface is the same builders exposed as JSX. `richMessage`
+// composes the root element and validates it at runtime.
+export const simple = richMessage(
+    <Heading size={1}>Welcome</Heading>,
+    <Paragraph>
+        Hello from <Bold>grammy-rich-messages</Bold>.
+    </Paragraph>,
 );
 
 export const simpleJson = JSON.stringify(simple);

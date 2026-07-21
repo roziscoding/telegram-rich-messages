@@ -1,11 +1,10 @@
 // deno-lint-ignore-file no-import-prefix -- grammy pulled directly from lib.deno.dev in the example
 import { Bot } from "https://lib.deno.dev/x/grammy@^1.45/mod.ts";
-import { richMessages, type RichMessagesFlavor } from "../src/mod.ts";
 import {
     Bold,
     Divider,
     Paragraph,
-    RichMessage,
+    richMessage,
     Table,
     TableCell,
     TableRow,
@@ -14,45 +13,38 @@ import { RichMessage as RichMessageBuilder } from "../src/fluent.ts";
 import {
     bold,
     paragraph,
-    richMessage,
+    richMessage as coreRichMessage,
     table,
     tableCell,
     tableRow,
 } from "../src/core.ts";
 
-const bot = new Bot<RichMessagesFlavor>(Deno.env.get("TELEGRAM_TOKEN")!);
-
-bot.use(richMessages);
+const bot = new Bot(Deno.env.get("TELEGRAM_TOKEN")!);
 
 bot.command("components", (ctx) => {
-    const message = (
-        <>
-            <RichMessage>
-                <Paragraph>
-                    Hello,{" "}
-                    <Bold>{ctx.message?.from.first_name ?? "there"}!</Bold>
-                </Paragraph>
-                <Paragraph>
-                    Here's a table:
-                </Paragraph>
-                <Divider />
-                <Table>
-                    <TableRow>
-                        <TableCell header>Name</TableCell>
-                        <TableCell header>Last Name</TableCell>
-                        <TableCell header>Age</TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>John</TableCell>
-                        <TableCell>Doe</TableCell>
-                        <TableCell>42</TableCell>
-                    </TableRow>
-                </Table>
-            </RichMessage>
-        </>
+    const message = richMessage(
+        <Paragraph>
+            Hello, <Bold>{ctx.message?.from.first_name ?? "there"}!</Bold>
+        </Paragraph>,
+        <Paragraph>
+            Here's a table:
+        </Paragraph>,
+        <Divider />,
+        <Table>
+            <TableRow>
+                <TableCell header>Name</TableCell>
+                <TableCell header>Last Name</TableCell>
+                <TableCell header>Age</TableCell>
+            </TableRow>
+            <TableRow>
+                <TableCell>John</TableCell>
+                <TableCell>Doe</TableCell>
+                <TableCell>42</TableCell>
+            </TableRow>
+        </Table>,
     );
 
-    return ctx.replyRich(message);
+    return ctx.replyWithRichMessage(message);
 });
 
 bot.command("fluent", (ctx) => {
@@ -79,11 +71,11 @@ bot.command("fluent", (ctx) => {
                 )
         );
 
-    return ctx.replyRich(message);
+    return ctx.replyWithRichMessage(message);
 });
 
 bot.command("core", (ctx) => {
-    const message = richMessage(
+    const message = coreRichMessage(
         paragraph(
             `Hello, `,
             bold(ctx.message?.from.first_name ?? "there"),
@@ -104,7 +96,7 @@ bot.command("core", (ctx) => {
         ),
     );
 
-    return ctx.replyRich(message);
+    return ctx.replyWithRichMessage(message);
 });
 
 bot.start({

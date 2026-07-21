@@ -1,11 +1,10 @@
 import * as rm from "../src/core.ts";
 import {
     Divider,
-    expectRichMessage,
     expectTableRow,
     ListItem,
     Paragraph,
-    RichMessage,
+    richMessage,
     Table,
     TableCell,
     TableRow,
@@ -121,10 +120,8 @@ function _typeSafetyAssertions(): void {
     rm.table(expectTableRow(jsxRow));
     void functionalInsideJsx;
 
-    const output = expectRichMessage(
-        <RichMessage>
-            <Paragraph>Hello</Paragraph>
-        </RichMessage>,
+    const output = richMessage(
+        <Paragraph>Hello</Paragraph>,
     );
     const first = output.blocks![0]!;
 

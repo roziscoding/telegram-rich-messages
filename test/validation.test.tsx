@@ -8,7 +8,7 @@ import {
     Map,
     Paragraph,
     Photo,
-    RichMessage,
+    richMessage,
 } from "../src/components.ts";
 
 const photo = { type: "photo" as const, media: "photo-file-id" };
@@ -20,76 +20,62 @@ if (false) {
 
 test("rejects compositions that cannot be sent as InputRichMessage", () => {
     expect(() => expectRichMessage(<Paragraph>not a root</Paragraph>)).toThrow(
-        "<RichMessage> root",
+        "richMessage() root",
+    );
+    expect(() => richMessage("plain text at block level" as any)).toThrow(
+        "only accepts rich-message blocks",
     );
     expect(() =>
-        expectRichMessage(
-            RichMessage({ children: "plain text at block level" } as any),
-        )
-    ).toThrow("only accepts rich-message blocks");
-    expect(() =>
-        expectRichMessage(
-            <RichMessage>
-                <Map
-                    location={{ latitude: 0, longitude: 0 }}
-                    zoom={25}
-                    width={100}
-                    height={100}
-                />
-            </RichMessage>,
+        richMessage(
+            <Map
+                location={{ latitude: 0, longitude: 0 }}
+                zoom={25}
+                width={100}
+                height={100}
+            />,
         )
     ).toThrow("zoom");
     expect(() =>
-        expectRichMessage(
-            <RichMessage>
-                <Map
-                    location={{ latitude: 0, longitude: 0 }}
-                    zoom={10}
-                    width={9500}
-                    height={600}
-                />
-            </RichMessage>,
+        richMessage(
+            <Map
+                location={{ latitude: 0, longitude: 0 }}
+                zoom={10}
+                width={9500}
+                height={600}
+            />,
         )
     ).toThrow("width and height");
     expect(() =>
-        expectRichMessage(
-            <RichMessage>
-                <Map
-                    location={{ latitude: 0, longitude: 0 }}
-                    zoom={10}
-                    width={1000}
-                    height={20}
-                />
-            </RichMessage>,
+        richMessage(
+            <Map
+                location={{ latitude: 0, longitude: 0 }}
+                zoom={10}
+                width={1000}
+                height={20}
+            />,
         )
     ).toThrow("ratio");
     expect(() =>
-        expectRichMessage(
-            <RichMessage>
-                {Photo({ media: photo, credit: "Unattached credit" } as any)}
-            </RichMessage>,
+        richMessage(
+            Photo({ media: photo, credit: "Unattached credit" } as any),
         )
     ).toThrow("credit requires caption");
     expect(() =>
-        expectRichMessage(
-            <RichMessage>
-                <List>{ListItem({ checked: true } as any)}</List>
-            </RichMessage>,
+        richMessage(
+            <List>{ListItem({ checked: true } as any)}</List>,
         )
     ).toThrow("checked requires checkbox");
 });
 
 test("accepts the documented zero boundary for map dimensions", () => {
     expect(
-        expectRichMessage(
-            <RichMessage>
-                <Map
-                    location={{ latitude: 0, longitude: 0 }}
-                    zoom={0}
-                    width={0}
-                    height={0}
-                />
-            </RichMessage>,
+        richMessage(
+            <Map
+                location={{ latitude: 0, longitude: 0 }}
+                zoom={0}
+                width={0}
+                height={0}
+            />,
         ).blocks![0],
     ).toEqual({
         type: "map",
