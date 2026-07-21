@@ -1,30 +1,33 @@
-# grammy-rich-messages
+# Rich messages for grammY
 
-Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) for [grammY](https://grammy.dev) with typed functions, a chaining builder, TSX, or any combination, then send them with grammY's `ctx.replyWithRichMessage(...)` or any Bot API client.
+This library builds [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) for [grammY](https://grammy.dev). It lets you compose the full rich-message tree — headings, tables, media, quotes, and every rich-text entity — with a declarative, type-safe API, then send it through grammY's `ctx.replyWithRichMessage`.
 
-- Built on grammY's own [`grammy/types`](https://grammy.dev) — builders return those exact objects, ready to send with grammY or any Bot API client
-- No React or virtual DOM
-- Compile-time hierarchy checks with functional builders
-- Runtime validation for JavaScript, casts, and TSX composition
-- Covers every rich-message block and rich-text entity in `grammy/types`
+With this library, you can:
+
+- Compose rich messages with typed **functions**, a **chaining** builder, **TSX**, or any mix of the three
+- Get compile-time hierarchy checks — invalid nesting (a paragraph where a table row belongs) is a type error
+- Rely on runtime validation for JavaScript, casts, and TSX composition, where the compiler can't help
+- Cover every rich-message block and rich-text entity in `grammy/types`
+
+It is built directly on grammY's own [`grammy/types`](https://grammy.dev), so builders return those exact objects — no React, no virtual DOM, nothing to unwrap before sending. The library is compatible with both Deno and Node.js.
 
 ## Installation
 
 ```sh
-npm install grammy-rich-messages
+npm i grammy-rich-messages
 ```
 
-Deno consumers import from deno.land/x:
+On Deno, import from `deno.land/x`:
 
 ```ts
 import { richMessage } from "https://deno.land/x/grammy_rich_messages/core.ts";
 ```
 
-`grammy` is a peer dependency; install it alongside this package when sending messages through a bot.
+`grammy` is a peer dependency; install it alongside this library when sending messages through a bot.
 
-## Sending
+## Quickstart
 
-Compose a value with any of the APIs below, then send it through grammY's `ctx.replyWithRichMessage` (or any Bot API client):
+This library only builds the message object. grammY already exposes the Bot API's `ctx.replyWithRichMessage`, so composing and sending stay separate — compose with any of the APIs below, then hand the result to grammY:
 
 ```tsx
 import { Bot } from "grammy";
@@ -44,19 +47,19 @@ bot.command("start", (ctx) =>
 bot.start();
 ```
 
-`richMessage` takes blocks — from functions, TSX, or a mix — and returns an `InputRichMessage` ready to send; passed an already-composed rich message it validates and returns it unchanged. A `RichMessage` chaining instance can be handed to `ctx.replyWithRichMessage` directly.
+`richMessage` is the message root. Give it blocks — from functions, TSX, or a mix — and it returns an `InputRichMessage` ready to send; hand it an already-composed rich message and it validates and returns it unchanged. A `RichMessage` chaining instance can be passed to `ctx.replyWithRichMessage` directly. The result is a plain `grammy/types` value, so it also works with any other Bot API client.
 
-See [`examples/bot.tsx`](./examples/bot.tsx) for the same handler written with the functional, chaining, and TSX APIs.
+See [`examples/bot.tsx`](./examples/bot.tsx) for the same handler written with all three APIs.
 
-## Usage
+## The three APIs
 
-The API can be used with functions, a chaining builder, or TSX. All three create the same canonical values and use the same runtime validation.
+Functions, chaining, and TSX all produce the same canonical values and run the same runtime validation. Pick whichever reads best for the message at hand — or combine them.
 
-- **[Functional API](#functional-api):** provides the strongest TypeScript guarantees because each builder preserves its exact value category, allowing invalid nesting to be caught at compile time. Deeply nested messages, however, can be harder to scan.
-- **[Chaining API](#chaining-api):** accumulates canonical blocks directly and uses contextual builders for tables.
-- **[TSX](#tsx):** mirrors the message structure and works naturally with arrays, conditions, fragments, and custom components. TypeScript widens JSX expressions to `JSX.Element`, so parent-child hierarchy is checked at runtime instead of compile time.
+- **[Functional](#functional):** strongest TypeScript guarantees. Each builder preserves its exact value category, so invalid nesting is caught at compile time. Deeply nested messages can be harder to scan.
+- **[Chaining](#chaining):** accumulates canonical blocks method by method, with contextual builders for tables and rows.
+- **[TSX](#tsx):** mirrors the message structure and works naturally with arrays, conditions, fragments, and custom components. TypeScript widens JSX to `JSX.Element`, so hierarchy is checked at runtime instead of compile time.
 
-### Functional API
+### Functional
 
 ```ts
 import {
@@ -69,7 +72,7 @@ import {
     tableRow,
 } from "grammy-rich-messages/core";
 
-const input = richMessage(
+const message = richMessage(
     heading({ size: 1 }, "Build report"),
     paragraph("Status: ", bold("green")),
     table(
@@ -86,17 +89,17 @@ const input = richMessage(
 );
 ```
 
-Builders preserve their value category, so TypeScript checks the hierarchy:
+Because each builder keeps its value category, the compiler checks the hierarchy for you:
 
 ```ts
-table(tableRow(tableCell("valid"))); // valid
+table(tableRow(tableCell("valid"))); // ok
 table(paragraph("not a row")); // type error
 bold(paragraph("not rich text")); // type error
 ```
 
-The same checks run at runtime for JavaScript and values coming from `any`, `unknown`, or casts.
+The same checks run at runtime for plain JavaScript and for values coming from `any`, `unknown`, or casts.
 
-### Chaining API
+### Chaining
 
 ```ts
 import { RichMessage } from "grammy-rich-messages/chaining";
@@ -107,7 +110,7 @@ const results = [
     { model: "Hermes-2", score: 97.1 },
 ];
 
-const input = new RichMessage({ skipEntityDetection: true })
+const message = new RichMessage({ skipEntityDetection: true })
     .heading("Build report", { size: 1 })
     .paragraph("Status: ", bold("green"))
     .table(
@@ -126,11 +129,11 @@ const input = new RichMessage({ skipEntityDetection: true })
     );
 ```
 
-A `RichMessage` instance `implements InputRichMessage`, so it can be passed straight to grammY (or any Bot API client); its `toJSON()` produces the canonical value on serialization. Every functional block builder has a matching method, including media (`photo`, `video`, …) and containers (`blockQuote`, `collage`, `details`, …). Use `.add(block)` to append any pre-built block value. The `blocks` getter returns a snapshot; later mutations do not change earlier results.
+A `RichMessage` instance `implements InputRichMessage`, so it goes straight to grammY (or any Bot API client) and serializes to the canonical value via `toJSON()`. Every functional block builder has a matching method, including media (`photo`, `video`, …) and containers (`blockQuote`, `collage`, `details`, …). Use `.add(block)` to append any pre-built block, and read the `blocks` getter for a snapshot that later mutations don't change.
 
 ### TSX
 
-Point TypeScript at the package's JSX runtime:
+Point TypeScript at the library's JSX runtime — no React required:
 
 ```json
 {
@@ -141,7 +144,7 @@ Point TypeScript at the package's JSX runtime:
 }
 ```
 
-`jsxImportSource` only tells the compiler where the JSX runtime lives; the components themselves are imported from `grammy-rich-messages/components`. Use `.tsx` files without installing React:
+`jsxImportSource` only tells the compiler where the JSX runtime lives; the components themselves come from `grammy-rich-messages/components`:
 
 ```tsx
 import {
@@ -154,7 +157,7 @@ import {
     TableRow,
 } from "grammy-rich-messages/components";
 
-const input = richMessage(
+const message = richMessage(
     { skipEntityDetection: true },
     <Heading size={1}>Build report</Heading>,
     <Paragraph>
@@ -173,13 +176,11 @@ const input = richMessage(
 );
 ```
 
-`richMessage` is the message root for TSX too: pass block elements as arguments, optionally preceded by an options object. It accepts `JSX.Element` children and validates the composition at runtime.
-
-Arrays, fragments, conditional children, and custom components work normally.
+`richMessage` is the root here too: pass block elements as arguments, optionally preceded by an options object. Arrays, fragments, conditional children, and custom components all work as you'd expect.
 
 ## Mixing functions and TSX
 
-Functional values can go directly inside TSX:
+Functional values can go straight into TSX, and vice versa:
 
 ```tsx
 import { bold, table, tableCell, tableRow } from "grammy-rich-messages/core";
@@ -194,65 +195,46 @@ richMessage(
 );
 ```
 
-TypeScript widens JSX expressions to `JSX.Element`. Use a runtime narrowing guard when a JSX value needs to enter a strict functional boundary:
+TypeScript widens JSX expressions to `JSX.Element`, so a JSX value entering a strict functional boundary needs a runtime narrowing guard:
 
 ```tsx
-import { bold, richMessage, table } from "grammy-rich-messages/core";
-import {
-    expectTableRow,
-    TableCell,
-    TableRow,
-} from "grammy-rich-messages/components";
+import { table } from "grammy-rich-messages/core";
+import { expectTableRow, TableCell, TableRow } from "grammy-rich-messages/components";
 
 const row = (
     <TableRow>
-        <TableCell>{bold("hybrid")}</TableCell>
+        <TableCell>hybrid</TableCell>
     </TableRow>
 );
 
-const message = richMessage(
-    table(expectTableRow(row)),
-);
+table(expectTableRow(row));
 ```
 
-Available guards:
+The guards — `expectRichText`, `expectBlock`, `expectListItem`, `expectTableRow`, `expectTableCell`, and `expectRichMessage` — validate at runtime and narrow the type.
 
-- `expectRichText`
-- `expectBlock`
-- `expectListItem`
-- `expectTableRow`
-- `expectTableCell`
-- `expectRichMessage`
+## Entrypoints
 
-## API
+| Entrypoint                       | Exports                                                                       |
+| -------------------------------- | ----------------------------------------------------------------------------- |
+| `grammy-rich-messages/core`      | Functional builders, the `richMessage` root, and the Telegram types           |
+| `grammy-rich-messages/components`| TSX components, the `richMessage` root, and narrowing guards                   |
+| `grammy-rich-messages/chaining`  | `RichMessage`, `TableBuilder`, and `TableRowBuilder`                          |
 
-The package has three public entrypoints:
+Every TSX component has a lower-camel-case builder in `core`. `core` exports a strict `richMessage` that only accepts block values, so invalid children fail at compile time; `components` exports one that also accepts `JSX.Element` children and validates at runtime. Both return the same value.
 
-- `grammy-rich-messages/core` — functional builders, the `richMessage` root, and the Telegram types (re-exported from `grammy/types`)
-- `grammy-rich-messages/components` — TSX components, the `richMessage` root, and narrowing guards
-- `grammy-rich-messages/chaining` — `RichMessage`, `TableBuilder`, and `TableRowBuilder`
+| Category    | Components / functions                                                                                                                                                  |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root        | `richMessage`                                                                                                                                                          |
+| Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer`                                                                                                                                |
+| Structure   | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details`                                                                        |
+| Layout      | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map`                                                                                                        |
+| Media       | `Animation`, `Audio`, `Photo`, `Video`, `VoiceNote`                                                                                                                    |
+| Styling     | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code`                                                                |
+| Entities    | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` |
 
-Every TSX component has a lower-camel-case builder in `core`. The message root is the `richMessage` function — there is no `RichMessage` component. `core` exports a strict `richMessage` that only accepts block values, so invalid children are caught at compile time; `components` exports one that also accepts TSX `JSX.Element` children and validates the composition at runtime. Both return the same value.
+Props use camelCase; builders emit the Bot API's snake_case fields immediately. Media builders take a Telegram `InputMedia` payload whose `media` field accepts a `file_id`/URL string or an upload (grammY's `InputFile`).
 
-| Category    | TSX                                                                                                                                                                                                   | Functions                                                                                                                                                                                             |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Root        | `richMessage(...)`                                                                                                                                                                                    | `richMessage`                                                                                                                                                                                         |
-| Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer`                                                                                                                                                               | `paragraph`, `heading`, `pre`, `footer`                                                                                                                                                               |
-| Structure   | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details`                                                                                                       | `divider`, `mathBlock`, `blockAnchor`, `list`, `listItem`, `blockQuote`, `pullQuote`, `details`                                                                                                       |
-| Layout      | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map`                                                                                                                                       | `collage`, `slideshow`, `table`, `tableRow`, `tableCell`, `map`                                                                                                                                       |
-| Media       | `Animation`, `Audio`, `Photo`, `Video`, `VoiceNote`                                                                                                                                                   | `animation`, `audio`, `photo`, `video`, `voiceNote`                                                                                                                                                   |
-| Styling     | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code`                                                                                               | `bold`, `italic`, `underline`, `strikethrough`, `spoiler`, `subscript`, `superscript`, `marked`, `code`                                                                                               |
-| Entities    | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` | `dateTime`, `textMention`, `customEmoji`, `inlineMath`, `link`, `email`, `phone`, `bankCard`, `mention`, `hashtag`, `cashtag`, `botCommand`, `textAnchor`, `anchorLink`, `reference`, `referenceLink` |
-
-Props use camelCase. Builders immediately produce the Bot API's snake_case fields.
-
-### Types
-
-Builders return `grammy/types` values — `InputRichMessage`, `InputRichBlock`, `RichText`, and friends — carrying a non-enumerable brand used for runtime category checks. The brand disappears in `JSON.stringify` and is structurally assignable to the bare grammY type, so a result passes straight to grammY (or any Bot API client) unchanged. These Telegram types are re-exported from `grammy-rich-messages/core`.
-
-Media builders take a Telegram `InputMedia` payload; its `media` field accepts an upload (grammY's `InputFile`) or a file_id/URL string.
-
-Public composition types include `RichTextValue`, `BlockValue`, `ListItemValue`, `TableCellValue`, `TableRowValue`, and `RichMessageValue`.
+Builders return `grammy/types` values (`InputRichMessage`, `InputRichBlock`, `RichText`, …) carrying a non-enumerable brand used for the runtime category checks. The brand disappears under `JSON.stringify` and is structurally assignable to the bare grammY type, so results pass straight through. The composition types `RichTextValue`, `BlockValue`, `ListItemValue`, `TableCellValue`, `TableRowValue`, and `RichMessageValue` are exported too.
 
 ## Development
 
@@ -261,11 +243,11 @@ deno task check
 deno task test
 ```
 
-`deno task check` type-checks the source, tests, and examples; `deno task test` runs the test suite.
+`deno task check` type-checks the source, tests, and examples; `deno task test` runs the suite.
 
 ## Scope
 
-This package builds rich-message objects. Sending them — authentication, HTTP calls, retries, webhooks, and polling — remains grammY's (or your Bot API client's) responsibility.
+This library builds rich-message objects. Sending them — authentication, HTTP calls, retries, webhooks, and polling — is grammY's (or your Bot API client's) job.
 
 ## License
 
